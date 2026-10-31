@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0" stop-color="#3d8571"/><stop offset="1" stop-color="#16362d"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2dc9b"/><stop offset="1" stop-color="#b8892f"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- crown kept inside the central 80% so maskable crops do not cut it -->
+  <g fill="url(#gold)" stroke="#5a3f12" stroke-width="6" stroke-linejoin="round">
+    <path d="M136 330 L120 186 L190 248 L256 150 L322 248 L392 186 L376 330 Z"/>
+    <rect x="132" y="336" width="248" height="40" rx="8"/>
+  </g>
+  <g fill="#f3ecd9" stroke="#5a3f12" stroke-width="5">
+    <circle cx="120" cy="180" r="15"/><circle cx="256" cy="142" r="17"/><circle cx="392" cy="180" r="15"/>
+  </g>
+  <circle cx="256" cy="290" r="18" fill="#2f6b5a" stroke="#5a3f12" stroke-width="5"/>
+  <!-- the crack that makes it a ruined crown -->
+  <path d="M290 150 L276 214 L304 250 L282 304 L300 336 L288 376" fill="none" stroke="#16362d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
