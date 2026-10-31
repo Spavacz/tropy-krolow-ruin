@@ -47,16 +47,17 @@ python -I -X utf8 guide.py statusmap.json guide_data.json guide.html en
 The language code is the one the app's database uses. The campaign is translated into `en`, `pl`, `fr`, `es`,
 `de`, `it`, `ru` and `cn`; `statusmap.py` prints the list it found.
 
-The hand-written files of each language sit in their own folder, `lang/<code>/`. To add a language, create its
-folder; the build reads it when that language is chosen. A file the folder lacks is read from `lang/pl/`, the
+The hand-written files of each language sit in their own folder, `lang/<code>/`. Every language above already has
+one with the page strings (`ui.json`); only `pl` has summaries. A folder is read when its language is chosen. A file the folder lacks is read from `lang/pl/`, the
 complete default, except `summaries.csv` (see below). Each part of the page comes from its own place:
 
 - **Game texts** (option names, location and status names, the game's "New Lead" hints) come from the database in
   the chosen language, so there is nothing to write. A status name the translation does not quote recognisably stays
   in English; French, which marks names in bold instead of quotes, keeps many of them in English.
-- **Page strings** (headings, buttons, messages) come from `lang/<code>/ui.json`, a `{key: text}` map. Copy
-  `lang/en/ui.json` and translate the values. A missing key is taken from `lang/pl/ui.json`, and the build lists
-  such keys. The strings go into HTML and JavaScript literals, so they must not contain `"` or a backtick. Set
+- **Page strings** (headings, buttons, messages) come from `lang/<code>/ui.json`, a `{key: text}` map. For a new
+  language, copy `lang/en/ui.json` and translate the values; the existing translations welcome corrections. A missing key is taken from `lang/pl/ui.json`, and the build lists
+  such keys. The strings go into HTML and JavaScript literals, so the build refuses `"`, `'`, a backtick, `\`, `<`
+  and `>` (use typographic quotes and apostrophes instead). Set
   `lang` to the page's BCP 47 language tag (e.g. `de`), which also drives alphabetical sorting.
 - **Summaries** ("what has happened", one or two sentences per status part) are written by hand in
   `lang/<code>/summaries.csv`, with the columns of `lang/pl/summaries.csv` (`status` in English, `part`, `text`;

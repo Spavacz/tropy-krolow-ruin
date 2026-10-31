@@ -63,6 +63,7 @@ node guide_test.js guide_data.json
   `summary_src.py statusmap.json <katalog> 40`. Inny język ma własny plik (`lang/<kod>/summaries.csv`, z
   `summary_src.py … 40 <kod>`), pisany z tekstu gry w tym języku, a nie tłumaczony. Angielskiego celowo nie ma w repo.
   Pliki ręczne leżą w `lang/<kod>/`; brakujący plik guide.py bierze z `lang/pl/`, poza streszczeniami.
+  Każdy język kampanii ma `lang/<kod>/ui.json` (tłumaczenia napisów strony); build odrzuca w nich " ' ` \ < >.
 - `lang/pl/leads_extra.csv`: wskazówki z ręcznie dobranym warunkiem pokazania (`show`) i zniknięcia (`hide`),
   alternatywy oddzielone `;`. Wiersz nadpisuje też automatycznie przypiętą wskazówkę. Używaj, gdy
   zadanie kończy się statusem z innego wątku, np. mapa senatora kończy się na Przyjaciel szlachty cz. 3.

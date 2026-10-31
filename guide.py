@@ -204,6 +204,9 @@ own = json.load(open(lang_file("ui.json"), encoding="utf-8"))
 if ui.keys() - own.keys():
     print(f"page strings missing from lang/{LANG}/ui.json, {DEFAULT} used:", ", ".join(sorted(ui.keys() - own.keys())))
 ui.update(own)
+# the strings land in HTML and in "…", '…' and `…` JavaScript literals unescaped
+bad = {k: t for k, t in ui.items() if re.search(r"[\"'`\\<>]", t)}
+assert not bad, f"lang/{LANG}/ui.json strings must not contain \" ' ` \\ < >: {bad}"
 page = re.sub(r"\{\{(\w+)\}\}", lambda m: ui[m[1]], page)
 open(sys.argv[3], "w", encoding="utf-8").write(page.replace("/*DATA*/", data).replace("/*LOGIC*/", logic))
 print(f"{len(gates)} gates, {len(leads)} of {sum(len(v['leads']) for v in V.values())} leads keyed ({LANG})")
