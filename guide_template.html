@@ -1,0 +1,412 @@
+<title>Tropy Królów Ruin</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+/* One column like a campaign sheet: sticky chapter bar, then the advice list or the status sheet. */
+:root {
+  --bg: #eef0ea; --panel: #f8f9f5; --fg: #1d2420; --muted: #5b665f; --line: #cfd6cc;
+  --accent: #2f6b5a; --on-accent: #f3f6f1; --lead: #6b5420; --lead-bg: #f3ecd9;
+  --display: "Alegreya SC", Georgia, serif; --body: "Alegreya Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121715; --panel: #1a211e; --fg: #e3e8e0; --muted: #98a59c; --line: #2c3631;
+  --accent: #74b8a1; --on-accent: #0e1412; --lead: #e0c27c; --lead-bg: #2a2416; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121715; --panel: #1a211e; --fg: #e3e8e0; --muted: #98a59c; --line: #2c3631;
+  --accent: #74b8a1; --on-accent: #0e1412; --lead: #e0c27c; --lead-bg: #2a2416; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.45 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 640px; margin: 0 auto; padding-block: 12px 48px; display: grid; gap: 16px; }
+header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  padding-block: 10px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+h1 { font: 700 1.5rem/1.1 var(--display); margin: 0; letter-spacing: .02em; text-wrap: balance; }
+h2 { font: 500 1.1rem/1.2 var(--display); margin: 0; color: var(--muted); letter-spacing: .04em; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+label.ch { font-size: .9rem; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+select, input[type=search] { font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 6px; padding: 4px 8px; }
+input[type=search] { width: 100%; box-sizing: border-box; }
+.tabs { display: flex; gap: 4px; }
+.tabs button { flex: 1; font: 500 1rem var(--display); letter-spacing: .03em; padding: 8px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.tabs button[aria-selected=true] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+section { display: grid; gap: 10px; }
+.loc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; }
+.loc h3 { margin: 0; font: 700 1.05rem var(--display); display: flex; gap: 8px; align-items: baseline; }
+.num { font-variant-numeric: tabular-nums; color: var(--accent); }
+.loc ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.why { font-size: .85rem; color: var(--muted); }
+.lead { background: var(--lead-bg); border-left: 3px solid var(--lead); padding: 8px 12px; border-radius: 0 6px 6px 0; }
+.lead small { display: block; color: var(--muted); font-variant-numeric: tabular-nums; }
+.note { font-size: .9rem; color: var(--muted); margin: 0; }
+.banner { background: var(--lead-bg); border-radius: 8px; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.st { display: grid; gap: 4px; padding-block: 8px; border-bottom: 1px solid var(--line); }
+.st b { font-weight: 500; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { min-width: 2.1em; padding: 3px 6px; font: 500 .9rem var(--body); font-variant-numeric: tabular-nums;
+  border: 1px solid var(--line); border-radius: 5px; background: var(--panel); color: var(--fg); cursor: pointer; }
+.chip[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+details.thread { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+details.thread summary { cursor: pointer; list-style: none; display: grid; gap: 2px; }
+details.thread summary::-webkit-details-marker { display: none; }
+details.thread summary b { font: 700 1rem var(--display); }
+details.thread ol { margin: 8px 0 0; padding-left: 1.4em; display: grid; gap: 4px; color: var(--muted); font-size: .95rem; }
+.maplist { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.maplist .chip { text-align: left; display: flex; gap: 6px; align-items: baseline; min-width: 0; }
+.maplist .chip span { overflow-wrap: anywhere; }
+.transfer { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+.transfer textarea { width: 100%; box-sizing: border-box; font: .8rem/1.3 ui-monospace, monospace; color: var(--fg);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px; word-break: break-all; }
+details.older > summary { cursor: pointer; color: var(--muted); padding-block: 6px; }
+details.older { display: grid; gap: 8px; }
+details.older[open] > details.thread { margin-top: 8px; }
+.btn { font: inherit; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Tropy Królów Ruin</h1>
+    <div class="row">
+      <label class="ch">Rozdział <select id="chN"></select></label>
+      <label class="ch">ścieżka <select id="chL"><option value="">–</option><option>A</option><option>B</option></select></label>
+      <label class="ch">część <select id="chP"><option value="0">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+    </div>
+    <div class="row" id="party" aria-label="Postaci w drużynie"></div>
+    <div class="tabs" role="tablist">
+      <button id="tabGo" role="tab" aria-selected="true">Dokąd iść</button>
+      <button id="tabSt" role="tab" aria-selected="false">Statusy</button>
+      <button id="tabMap" role="tab" aria-selected="false">Mapa</button>
+    </div>
+  </header>
+
+  <div id="fromLink" class="banner" hidden>
+    <span id="fromLinkMsg"></span>
+    <span class="row"><button class="btn" id="linkYes">Wczytaj</button><button class="btn" id="linkNo">Zostaw moje</button></span>
+  </div>
+
+
+  <main id="go">
+    <section id="chapterIntro"></section>
+    <section id="story"></section>
+    <section id="leads"></section>
+    <section id="gates"></section>
+    <section id="heroGates"></section>
+    <section id="chapterGates"></section>
+    <p class="note" id="mapNote">Pokazuję wszystkie lokacje. W zakładce Mapa możesz zaznaczyć te, które leżą na stole.</p>
+  </main>
+
+  <main id="map" hidden>
+    <p class="note">Zaznacz lokacje, które leżą teraz na stole. Rady pokażą tylko je. Bez zaznaczeń widać wszystkie.</p>
+    <div class="maplist" id="maplist"></div>
+  </main>
+
+  <main id="sheet" hidden>
+    <input type="search" id="q" placeholder="Szukaj statusu…" aria-label="Szukaj statusu">
+    <div id="list"></div>
+    <p class="note">Statusy bez numerowanych części (np. Upływ Czasu, Dług) zaznaczasz liczbą: ile ich masz.</p>
+    <section class="transfer" aria-labelledby="trH">
+      <h2 id="trH">Przenieś na inne urządzenie</h2>
+      <p class="note">Kod zawiera statusy, rozdział, drużynę i mapę. Skopiuj go tutaj i wklej na drugim urządzeniu.</p>
+      <div class="row"><button class="btn" id="copyLink">Kopiuj link ze stanem</button><span class="note" id="linkMsg" role="status"></span></div>
+      <p class="note">Link otwiera tę stronę z Twoimi statusami. Starszy sposób, długi kod, działa dalej:</p>
+      <div class="row"><button class="btn" id="copyCode">Kopiuj kod</button><span class="note" id="copyMsg" role="status"></span></div>
+      <textarea id="code" rows="3" aria-label="Kod stanu"></textarea>
+      <div class="row"><button class="btn" id="loadCode">Wczytaj wklejony kod</button><span class="note" id="loadMsg" role="status"></span></div>
+    </section>
+  </main>
+</div>
+
+<script>
+/*LOGIC*/
+const DATA = /*DATA*/;
+const KEY = "tropy-kr-v1";
+const COUNTED_MAX = 6;
+
+const name = s => DATA.names[s] || s.replace(/^Time Passes: Chapter (.+)$/, "Upływ Czasu (Rozdział $1)");
+const part = p => p == null ? "" : " cz. " + p;
+const esc = t => t.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+
+const HEROES = ["Elgan", "Gerdwyn", "Iunis", "Osbert"];
+let state = { owned: [], ch: { n: 1, letter: "", part: 0 }, heroes: [], onMap: [] };
+// a state saved while the page still opened on example statuses is not the player's own
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.owned && !s.sample) state = s; } catch (e) {}
+state.heroes = state.heroes || [];
+state.owned = state.owned.map(k => k.endsWith("|") ? k + "1" : k);  // counted statuses used to be a single "Status|"
+state.onMap = state.onMap || [];  // location cards on the table; empty means show every location
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+const chN = document.getElementById("chN");
+for (let i = 1; i <= 10; i++) chN.add(new Option(i, i));
+
+function chapterText([a, b, letter, p, further]) {
+  return "Rozdział " + a + (b !== a ? "–" + b : "") + letter + (p ? ", część " + p : "") + (further ? " lub dalej" : "");
+}
+
+function place(g) {
+  const [loc, verse] = g.at.split("/");
+  return g.locs.length ? g.locs : ["KT wpis " + verse];
+}
+
+// where to reread a passage in the companion app; the page keeps only the numbers
+const ref = at => {
+  const [loc, verse] = at.split("/");
+  // the app splits the Book of Secrets into two pseudo-locations, 999 (entries 0-600) and 1001 (601-1263)
+  return loc === "999" || loc === "1001" ? "KT wpis " + verse : `lokacja ${loc}, wers ${verse}`;
+};
+const refs = ats => ats && ats.length ? `<p class="note">Tekst w aplikacji: ${ats.slice(0, 3).map(ref).join(" lub ")}</p>` : "";
+
+// the passage that sent the party into the current chapter part, or closed the previous chapter
+function previousPart({ n, letter, part }) {
+  const keys = part > 1 ? [`${n}${letter}:${part}`, `${n}:${part}`]
+    : [`${n}${letter}:1`, `${n}:1`, `END ${n - 1}${letter}`, `END ${n - 1}`, `END ${n - 1}A`, `END ${n - 1}B`];
+  for (const k of keys) if (DATA.chapter_refs[k]) return [k, DATA.chapter_refs[k]];
+  return null;
+}
+
+function renderChapterIntro() {
+  const found = previousPart(state.ch);
+  const el = document.getElementById("chapterIntro");
+  if (!found) {
+    el.innerHTML = `<p class="note">Nie znam wpisu, który zamknął poprzednią część. Ustaw rozdział i część w nagłówku.</p>`;
+    return;
+  }
+  const [k, ats] = found;
+  const title = k.startsWith("END") ? "Zakończenie rozdziału " + k.slice(4) : "Początek części " + k.replace(":", ", część ");
+  // a part can be reached from several branches; every entry is listed, the player knows which one they read
+  el.innerHTML = `<p class="note">${esc(title)}: ${ats.map(ref).join(" lub ")}</p>`;
+}
+
+function renderStory(owned, relevant) {
+  // per thread: the recap of the highest part owned, earlier parts folded below it
+  const parts = {};
+  for (const k of owned) {
+    const [s, p] = k.split("|");
+    if (DATA.summaries[k]) (parts[s] = parts[s] || []).push(+p);
+  }
+  const threads = Object.entries(parts).map(([s, ps]) => [s, ps.sort((a, b) => a - b)])
+    .sort((a, b) => name(a[0]).localeCompare(name(b[0]), "pl"));
+  const html = ([s, ps]) => {
+    const top = ps[ps.length - 1];
+    const earlier = ps.slice(0, -1).map(p => `<li value="${p}">${esc(DATA.summaries[s + "|" + p])}</li>`).join("");
+    return `<details class="thread"><summary><b>${esc(name(s))} <span class="num">cz. ${top}</span></b>${esc(DATA.summaries[s + "|" + top])}</summary>${refs(DATA.sources[s + "|" + top])}${earlier ? "<ol>" + earlier + "</ol>" : ""}</details>`;
+  };
+  // threads that open something on the table or hold a live hint come first; the rest fold away
+  const now = threads.filter(([s]) => relevant.has(s)), older = threads.filter(([s]) => !relevant.has(s));
+  document.getElementById("story").innerHTML = threads.length
+    ? "<h2>Co się działo</h2>" +
+      (now.length ? now.map(html).join("") : `<p class="note">Żaden wątek nie otwiera teraz nic na Twojej mapie.</p>`) +
+      (older.length ? `<details class="older"><summary>Starsze wątki (${older.length})</summary>${older.map(html).join("")}</details>` : "")
+    : "";
+}
+
+function renderGo() {
+  const owned = new Set(state.owned);
+  const ch = state.ch;
+  renderChapterIntro();
+  const onTable = locs => !state.onMap.length || !locs.length || locs.some(p => state.onMap.includes(p));
+  const leads = activeLeads(DATA, owned).filter(l => onTable(l.locs));
+  document.getElementById("leads").innerHTML = leads.length
+    ? "<h2>Wskazówki z gry</h2>" + leads.map(l =>
+        `<div class="lead">${esc(l.text)}<small>${ref(l.at)}</small></div>`).join("")
+    : "";
+
+  const byLoc = (list) => {
+    const m = new Map();
+    for (const g of list) for (const p of place(g)) {
+      if (!m.has(p)) m.set(p, []);
+      m.get(p).push(g);
+    }
+    return [...m].sort((a, b) => b[1].length - a[1].length || String(a[0]).localeCompare(String(b[0]), "pl", { numeric: true }));
+  };
+  const item = g => {
+    const why = g.conds.filter(c => c[2]).map(([s, p]) => "masz " + name(s) + part(p))
+      .concat(g.heroes.length ? ["dla: " + g.heroes.join(" lub ")] : [], g.chapter.map(chapterText));
+    const what = g.label ? esc(g.label.replace(/^\d+\s+/, "")) : "Wróć tutaj, czeka coś nowego";
+    return `<li>${what}<div class="why">${esc(why.join(" · "))}</div></li>`;
+  };
+  const card = ([p, gs]) => {
+    const seen = new Set();
+    const items = gs.map(item).filter(h => !seen.has(h) && seen.add(h));
+    const title = typeof p === "number"
+      ? `<span class=num>${p}</span> ${esc(DATA.loc_names[p] || "")}` : `<span class=num>${p}</span>`;
+    return `<div class="loc"><h3>${title}</h3><ul>${items.join("")}</ul></div>`;
+  };
+  // book entries have no card, so they stay visible whatever is on the table
+  const shown = list => byLoc(list).filter(([p]) => !state.onMap.length || typeof p !== "number" || state.onMap.includes(p));
+
+  const open = openGates(DATA, owned, ch, new Set(state.heroes));
+  const byStatus = open.filter(g => g.conds.some(c => c[2]));
+  const byHero = open.filter(g => !g.conds.some(c => c[2]) && g.heroes.length);
+  const byChapter = open.filter(g => !g.conds.some(c => c[2]) && !g.heroes.length);
+  document.getElementById("heroGates").innerHTML = shown(byHero).length
+    ? `<h2>Dla Twoich postaci</h2>` + shown(byHero).map(card).join("") : "";
+  document.getElementById("gates").innerHTML = "<h2>Odblokowane przez Twoje statusy</h2>" +
+    (shown(byStatus).length ? shown(byStatus).map(card).join("") : `<p class="note">Żaden z zaznaczonych statusów nie otwiera teraz nic nowego.</p>`);
+  document.getElementById("chapterGates").innerHTML = shown(byChapter).length
+    ? `<h2>Nowe w tym rozdziale</h2>` + shown(byChapter).map(card).join("") : "";
+  document.getElementById("mapNote").hidden = state.onMap.length > 0;
+
+  const relevant = new Set(leads.flatMap(l => l.keys.map(k => k[0])));
+  for (const [, gs] of shown(byStatus)) for (const g of gs) for (const c of g.conds) if (c[2]) relevant.add(c[0]);
+  renderStory(owned, relevant);
+}
+
+function renderSheet() {
+  const owned = new Set(state.owned);
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const all = Object.keys(DATA.max_part).filter(s => s !== "Time Passes")
+    .sort((a, b) => name(a).localeCompare(name(b), "pl"));
+  document.getElementById("list").innerHTML = all.filter(s => !q || name(s).toLowerCase().includes(q)).map(s => {
+    const n = DATA.max_part[s];
+    // a status without numbered parts is a tally: tapping 3 means "I hold three"
+    const tally = !n;
+    const parts = Array.from({ length: n || COUNTED_MAX }, (_, i) => i + 1);
+    return `<div class="st"><b>${esc(name(s))}</b>${tally ? '<span class="note">ile masz</span>' : ""}<div class="chips">${parts.map(p =>
+      `<button class="chip" data-k="${esc(s + "|" + p)}"${tally ? ' data-tally="1"' : ""} aria-pressed="${owned.has(s + "|" + p)}">${p}</button>`).join("")}</div></div>`;
+  }).join("");
+}
+
+function render() {
+  chN.value = state.ch.n;
+  document.getElementById("chL").value = state.ch.letter;
+  document.getElementById("chP").value = state.ch.part;
+  document.getElementById("party").innerHTML = '<span class="ch">Drużyna</span>' + HEROES.map(h =>
+    `<button class="chip" data-h="${h}" aria-pressed="${state.heroes.includes(h)}">${h}</button>`).join("");
+  document.getElementById("tabSt").textContent = "Statusy (" + state.owned.length + ")";
+  document.getElementById("tabMap").textContent = "Mapa (" + state.onMap.length + ")";
+  document.getElementById("maplist").innerHTML = Object.entries(DATA.loc_names).map(([n, nm]) =>
+    `<button class="chip" data-loc="${n}" aria-pressed="${state.onMap.includes(+n)}"><b class="num">${n}</b><span>${esc(nm)}</span></button>`).join("");
+  renderGo();
+  renderSheet();
+}
+
+function tab(view) {
+  for (const [id, t] of [["go", "tabGo"], ["sheet", "tabSt"], ["map", "tabMap"]]) {
+    document.getElementById(id).hidden = id !== view;
+    document.getElementById(t).setAttribute("aria-selected", id === view);
+  }
+}
+document.getElementById("tabGo").onclick = () => tab("go");
+document.getElementById("tabSt").onclick = () => tab("sheet");
+document.getElementById("tabMap").onclick = () => tab("map");
+
+for (const [id, f] of [["chN", "n"], ["chL", "letter"], ["chP", "part"]])
+  document.getElementById(id).onchange = e => {
+    state.ch[f] = f === "letter" ? e.target.value : +e.target.value;
+    save(); render();
+  };
+document.getElementById("q").oninput = renderSheet;
+
+// state <-> text code (base64 of the JSON; encodeURIComponent keeps Polish letters intact)
+const toCode = () => btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+function fromCode(code) {
+  const s = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+  const ok = s && Array.isArray(s.owned) && s.owned.every(k => typeof k === "string") && s.ch && Number.isFinite(+s.ch.n);
+  if (!ok) throw new Error("bad code");
+  return { owned: s.owned, ch: { n: +s.ch.n, letter: s.ch.letter === "A" || s.ch.letter === "B" ? s.ch.letter : "", part: +s.ch.part || 0 },
+    heroes: (s.heroes || []).filter(h => HEROES.includes(h)), onMap: (s.onMap || []).map(Number).filter(Number.isFinite), sample: false };
+}
+// link with the state in its #hash; the artifact link carries a plain #name, so the code is letters, digits and "-"
+const PAGE_URL = "https://claude.ai/artifact/ND3eEQjjzcQHJgEhprWtAP";
+document.getElementById("copyLink").onclick = () => {
+  const msg = document.getElementById("linkMsg"), code = encodeState(DATA, state), url = PAGE_URL + "#" + code;
+  try { history.replaceState(null, "", "#" + code); } catch (e) {}
+  navigator.clipboard.writeText(url).then(() => { msg.textContent = "Skopiowano link."; },
+    () => { const box = document.getElementById("code"); box.value = url; box.select(); msg.textContent = "Link jest w polu poniżej, zaznaczony do skopiowania."; });
+};
+
+// opening a link with a state asks first: it would replace what this browser has saved
+let linked = null;
+function checkLink() {
+  const code = decodeURIComponent(location.hash.slice(1));
+  const banner = document.getElementById("fromLink"), msg = document.getElementById("fromLinkMsg");
+  if (!code) return;
+  if (!code.startsWith("t")) {
+    // diagnostic: show what the viewer actually handed over instead of ignoring it
+    msg.textContent = `Strona dostała z linku znacznik „${code.slice(0, 20)}…” (${code.length} znaków), który nie jest stanem gry.`;
+    document.getElementById("linkYes").hidden = true;
+    banner.hidden = false;
+    return;
+  }
+  try {
+    linked = decodeState(DATA, code);
+    if (!state.owned.length) {
+      // nothing ticked here yet, so there is nothing to lose: load straight away
+      state = linked; save(); render();
+      msg.textContent = `Wczytano stan z linku: ${linked.owned.length} zaznaczeń, rozdział ${linked.ch.n}${linked.ch.letter}.`;
+      document.getElementById("linkYes").hidden = true;
+      document.getElementById("linkNo").textContent = "OK";
+    } else {
+      msg.textContent = `Link zawiera stan gry: ${linked.owned.length} zaznaczeń, rozdział ${linked.ch.n}${linked.ch.letter}. Wczytać go zamiast obecnego (${state.owned.length} zaznaczeń)?`;
+      document.getElementById("linkYes").hidden = false;
+      document.getElementById("linkNo").textContent = "Zostaw moje";
+    }
+  } catch (e) {
+    linked = null;
+    msg.textContent = e.message === "version"
+      ? "Ten link pochodzi ze starszej wersji strony i nie da się go odczytać. Poproś o nowy link."
+      : `Link ze stanem jest uszkodzony: strona dostała ${code.length} znaków, a pełny link ma ok. 115. Skopiuj go jeszcze raz w całości.`;
+    document.getElementById("linkYes").hidden = true;
+  }
+  banner.hidden = false;
+}
+document.getElementById("linkYes").onclick = () => {
+  if (linked) { state = linked; save(); render(); }
+  document.getElementById("fromLink").hidden = true;
+};
+document.getElementById("linkNo").onclick = () => { document.getElementById("fromLink").hidden = true; };
+window.addEventListener("hashchange", checkLink);
+
+document.getElementById("copyCode").onclick = () => {
+  const box = document.getElementById("code"), msg = document.getElementById("copyMsg");
+  box.value = toCode();
+  navigator.clipboard.writeText(box.value).then(() => { msg.textContent = "Skopiowano."; },
+    () => { box.select(); msg.textContent = "Kod jest w polu poniżej, zaznaczony do skopiowania."; });
+};
+document.getElementById("loadCode").onclick = () => {
+  const msg = document.getElementById("loadMsg");
+  try {
+    state = fromCode(document.getElementById("code").value);
+    save(); render();
+    msg.textContent = "Wczytano: " + state.owned.length + " zaznaczeń.";
+  } catch (e) {
+    msg.textContent = "To nie jest poprawny kod. Skopiuj go jeszcze raz w całości.";
+  }
+};
+document.getElementById("maplist").onclick = e => {
+  const b = e.target.closest("[data-loc]");
+  if (!b) return;
+  const n = +b.dataset.loc;
+  state.onMap = state.onMap.includes(n) ? state.onMap.filter(x => x !== n) : [...state.onMap, n];
+  save();
+  b.setAttribute("aria-pressed", state.onMap.includes(n));
+  document.getElementById("tabMap").textContent = "Mapa (" + state.onMap.length + ")";
+  renderGo();
+};
+document.getElementById("party").onclick = e => {
+  const h = e.target.dataset && e.target.dataset.h;
+  if (!h) return;
+  state.heroes = state.heroes.includes(h) ? state.heroes.filter(x => x !== h) : [...state.heroes, h];
+  save(); render();
+};
+document.getElementById("list").onclick = e => {
+  const k = e.target.dataset && e.target.dataset.k;
+  if (!k) return;
+  const owned = new Set(state.owned);
+  if (e.target.dataset.tally) {
+    const [s, p] = k.split("|");
+    const n = count(owned, s) === +p ? 0 : +p;  // tapping the current tally clears it
+    for (let i = 1; i <= COUNTED_MAX; i++) i <= n ? owned.add(s + "|" + i) : owned.delete(s + "|" + i);
+  } else owned.has(k) ? owned.delete(k) : owned.add(k);
+  state.owned = [...owned];
+  save();
+  for (const b of e.target.parentNode.children) b.setAttribute("aria-pressed", owned.has(b.dataset.k));
+  document.getElementById("tabSt").textContent = "Statusy (" + state.owned.length + ")";
+  renderGo();
+};
+render();
+checkLink();
+</script>
