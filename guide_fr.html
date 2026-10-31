@@ -413,9 +413,19 @@ for (const [id, f] of [["chN", "n"], ["chL", "letter"], ["chP", "part"]])
   };
 document.getElementById("q").oninput = renderSheet;
 // each language is its own page; the saved state is shared, so the switch keeps it
-const langSel = document.getElementById("lang");
+const langSel = document.getElementById("lang"), LANG_KEY = "tropy-kr-lang";
 langSel.hidden = langSel.options.length < 2;
-langSel.onchange = () => { location.href = langSel.value; };
+try {
+  // / serves the Polish page: send a returning player to the language they picked; a page opened by name is remembered
+  const want = localStorage.getItem(LANG_KEY), here = langSel.value;
+  if (location.pathname.endsWith("/") && want && want !== here && [...langSel.options].some(o => o.value === want))
+    location.replace(want + location.hash);
+  else localStorage.setItem(LANG_KEY, here);
+} catch (e) {}
+langSel.onchange = () => {
+  try { localStorage.setItem(LANG_KEY, langSel.value); } catch (e) {}
+  location.href = langSel.value;
+};
 
 // state <-> text code (base64 of the JSON; encodeURIComponent keeps Polish letters intact)
 const toCode = () => btoa(unescape(encodeURIComponent(JSON.stringify(state))));

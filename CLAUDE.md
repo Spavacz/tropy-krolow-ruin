@@ -44,7 +44,8 @@ node guide_test.js guide_data.json                 # i guide_data_<kod>.json dla
   niezdobytej części), wskazówki („Nowa Wskazówka” i przyciski „Podpowiedź”), streszczenia, odnośniki do
   wpisów i wstawia dane z logiką do `guide_template.html`, co daje samodzielny `guide.html`.
 - Każdy język to osobna strona: polski `guide.html` (Netlify `/`), reszta `guide_<kod>.html`, wszystkie w repo
-  i na Netlify (decyzja użytkownika). Przełącznik w nagłówku linkuje strony; stan w `localStorage` jest wspólny. Napisy strony są w `lang/<kod>/ui.json` (`{{klucz}}` w szablonie, w HTML
+  i na Netlify (decyzja użytkownika). Przełącznik w nagłówku linkuje strony; stan w `localStorage` jest wspólny.
+  Wybrany język jest zapamiętany (`tropy-kr-lang`); samo `/` przekierowuje na niego, `/guide.html` już nie. Napisy strony są w `lang/<kod>/ui.json` (`{{klucz}}` w szablonie, w HTML
   i w literałach JS, więc teksty bez `"` i `` ` ``). `statusmap.json` trzyma teksty gry we wszystkich językach kampanii (en, pl, fr, es, de, it, ru, cn).
   Znacznik „New Lead” każdego tłumaczenia jest wykrywany sam (najczęstsze pogrubienie przy angielskim „New Lead”).
   Testy dopasowują po miejscu i warunku, nie po etykiecie, żeby działały w każdym języku.
