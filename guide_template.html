@@ -310,7 +310,9 @@ function fromCode(code) {
     heroes: (s.heroes || []).filter(h => HEROES.includes(h)), onMap: (s.onMap || []).map(Number).filter(Number.isFinite), sample: false };
 }
 // link with the state in its #hash; the artifact link carries a plain #name, so the code is letters, digits and "-"
-const PAGE_URL = "https://claude.ai/artifact/ND3eEQjjzcQHJgEhprWtAP";
+// inside a claude.ai artifact the page runs in a sandboxed frame whose location is not the shareable link
+const PAGE_URL = /claude/.test(location.hostname) ? "https://claude.ai/artifact/ND3eEQjjzcQHJgEhprWtAP"
+  : location.origin + location.pathname;
 document.getElementById("copyLink").onclick = () => {
   const msg = document.getElementById("linkMsg"), code = encodeState(DATA, state), url = PAGE_URL + "#" + code;
   try { history.replaceState(null, "", "#" + code); } catch (e) {}

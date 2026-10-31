@@ -46,8 +46,10 @@ node guide_test.js guide_data.json
   wpisów i wstawia dane z logiką do `guide_template.html`, co daje samodzielny `guide.html`.
 - `guide_logic.js` to logika współdzielona przez stronę i testy: warunki, rozdziały, liczniki, wskazówki,
   kodowanie stanu do linku. `guide_test.js` zawiera testy na prawdziwych danych.
-- Publikacja: narzędziem Artifact z `file_path` = `guide.html` (ten sam plik, więc ten sam URL). Adres
-  artefaktu jest też wpisany w szablonie (`PAGE_URL`), bo służy do kopiowania linku ze stanem.
+- Publikacja: Netlify z repo GitHub (`netlify.toml`: bez kroku budowania, `/` serwuje `guide.html`), więc
+  wystarczy commit i push gotowego `guide.html`. Stary artefakt claude.ai nadal działa (Artifact z
+  `file_path` = `guide.html`). `PAGE_URL` w szablonie bierze adres strony z `location`, a na claude.ai
+  używa wpisanego adresu artefaktu, bo tam strona siedzi w ramce o innym adresie.
 
 ## Dane pisane ręcznie (reszta jest generowana)
 

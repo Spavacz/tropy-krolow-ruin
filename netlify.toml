@@ -1,0 +1,8 @@
+# guide.html is committed ready-made (the game database is not in the repo), so there is no build step
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/"
+  to = "/guide.html"
+  status = 200
