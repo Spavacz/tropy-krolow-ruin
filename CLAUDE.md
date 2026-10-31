@@ -44,7 +44,7 @@ node guide_test.js guide_data.json
   niezdobytej części), wskazówki („Nowa Wskazówka” i przyciski „Podpowiedź”), streszczenia, odnośniki do
   wpisów i wstawia dane z logiką do `guide_template.html`, co daje samodzielny `guide.html`.
 - Język strony wybiera się przy budowaniu (`guide.py … guide.html en`, domyślnie `pl`), a nie na stronie:
-  na Netlify idzie tylko polski `guide.html`. Napisy strony są w `ui.json` (`{{klucz}}` w szablonie, w HTML
+  na Netlify idzie tylko polski `guide.html`. Napisy strony są w `lang/<kod>/ui.json` (`{{klucz}}` w szablonie, w HTML
   i w literałach JS, więc teksty bez `"` i `` ` ``). `statusmap.json` trzyma teksty gry we wszystkich językach kampanii (en, pl, fr, es, de, it, ru, cn).
   Znacznik „New Lead” każdego tłumaczenia jest wykrywany sam (najczęstsze pogrubienie przy angielskim „New Lead”).
   Testy dopasowują po miejscu i warunku, nie po etykiecie, żeby działały w każdym języku.
@@ -57,12 +57,13 @@ node guide_test.js guide_data.json
 
 ## Dane pisane ręcznie (reszta jest generowana)
 
-- `summaries.csv`: streszczenia każdej części statusu (`status` po angielsku, `part`, tekst po polsku;
+- `lang/pl/summaries.csv`: streszczenia każdej części statusu (`status` po angielsku, `part`, tekst po polsku;
   pusty tekst oznacza część czysto mechaniczną). Styl: 1–2 zdania, **formy neutralne płciowo** (bez
   „-łeś/-łaś”), tylko to, co już się wydarzyło. Brakujące części po zmianie danych wypisze
-  `summary_src.py statusmap.json <katalog> 40`. Inny język ma własny plik (`summaries_en.csv`, z
-  `summary_src.py … 40 en`), pisany z tekstu gry w tym języku, a nie tłumaczony. Takiego pliku celowo nie ma w repo.
-- `leads_extra.csv`: wskazówki z ręcznie dobranym warunkiem pokazania (`show`) i zniknięcia (`hide`),
+  `summary_src.py statusmap.json <katalog> 40`. Inny język ma własny plik (`lang/<kod>/summaries.csv`, z
+  `summary_src.py … 40 <kod>`), pisany z tekstu gry w tym języku, a nie tłumaczony. Angielskiego celowo nie ma w repo.
+  Pliki ręczne leżą w `lang/<kod>/`; brakujący plik guide.py bierze z `lang/pl/`, poza streszczeniami.
+- `lang/pl/leads_extra.csv`: wskazówki z ręcznie dobranym warunkiem pokazania (`show`) i zniknięcia (`hide`),
   alternatywy oddzielone `;`. Wiersz nadpisuje też automatycznie przypiętą wskazówkę. Używaj, gdy
   zadanie kończy się statusem z innego wątku, np. mapa senatora kończy się na Przyjaciel szlachty cz. 3.
 

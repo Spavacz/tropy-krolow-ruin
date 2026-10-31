@@ -1,6 +1,6 @@
-"""Dump, per status part, the game text where it is gained, in batches for writing summaries.csv (or summaries_en.csv).
+"""Dump, per status part, the game text where it is gained, in batches for writing lang/<LANG>/summaries.csv.
 
-Usage: python -I -X utf8 summary_src.py statusmap.json OUT_DIR [BATCH_SIZE] [pl|en]
+Usage: python -I -X utf8 summary_src.py statusmap.json OUT_DIR [BATCH_SIZE] [LANG]
 Parts already in that language's summaries file are skipped. Write each language from its own game text, not by
 translating the other file: the translations differ in detail.
 """
@@ -13,7 +13,7 @@ from pathlib import Path
 d = json.load(open(sys.argv[1], encoding="utf-8"))
 out, size = Path(sys.argv[2]), int(sys.argv[3]) if len(sys.argv) > 3 else 40
 lang = sys.argv[4] if len(sys.argv) > 4 else "pl"
-summaries = Path("summaries.csv" if lang == "pl" else f"summaries_{lang}.csv")
+summaries = Path("lang", lang, "summaries.csv")
 V = {int(k): v for k, v in d["verses"].items()}
 done = set()
 if summaries.exists():

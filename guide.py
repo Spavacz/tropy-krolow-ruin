@@ -2,8 +2,9 @@
 
 Usage: python -I -X utf8 guide.py statusmap.json guide_data.json guide.html [LANG]
 
-LANG (default pl) is a language code of the app's database; it picks the game texts, summaries.csv (pl) or
-summaries_<LANG>.csv, and the page strings in ui.json.
+LANG (default pl) is a language code of the app's database; it picks the game texts and the folder lang/<LANG>/
+with the hand-written files (ui.json, summaries.csv, leads_extra.csv). A file that folder lacks is read from lang/pl/,
+except summaries.csv: recaps in another language would not help, so the page is then built without them.
 A gate is a choice that needs a status (or a chapter, or a character) and can still lead to a status part not yet owned;
 the page shows the open ones. Leads are the game's own "New Lead" lines, keyed to the status parts
 gained right around them, so the page shows those whose thread has not moved on since.
@@ -13,12 +14,22 @@ import csv
 import json
 import re
 import sys
+from pathlib import Path
 
 d = json.load(open(sys.argv[1], encoding="utf-8"))
 V = {int(k): v for k, v in d["verses"].items()}
 BOOKS = {999, 1001}  # entry books: reached from map locations, never walked to
 LANG = sys.argv[4] if len(sys.argv) > 4 else "pl"
 assert LANG in d["langs"], f"{LANG} is not one of the app's languages: {d['langs']}"
+DEFAULT = "pl"  # the complete folder
+
+
+def lang_file(name):
+    own = Path("lang", LANG, name)
+    if own.exists() or name == "summaries.csv":
+        return own
+    print(f"no {own.as_posix()}: using lang/{DEFAULT}/{name}")
+    return Path("lang", DEFAULT, name)
 
 
 def chapter(s):
@@ -128,7 +139,7 @@ def part_key(k):
 
 
 # a row may also override an automatically keyed lead whose quest ends in another status; ";" separates alternatives
-for r in csv.DictReader(open("leads_extra.csv", encoding="utf-8")):
+for r in csv.DictReader(open(lang_file("leads_extra.csv"), encoding="utf-8")):
     v = next(v for v in V.values() if f'{v["loc"]}/{v["num"]}' == r["at"])
     # "starts" is Polish; the element it finds gives the text in either language
     text = next(t for t in v["leads"] if t["pl"].startswith(r["starts"]))[LANG]
@@ -137,12 +148,12 @@ for r in csv.DictReader(open("leads_extra.csv", encoding="utf-8")):
                   "hide": [part_key(k) for k in r["hide"].split(";")]})
 
 # one-line recaps written per status part; an empty text marks a purely mechanical part
-SUMMARIES = "summaries.csv" if LANG == "pl" else f"summaries_{LANG}.csv"
+SUMMARIES = lang_file("summaries.csv")
 try:
     summaries = {f'{r["status"]}|{r["part"]}': r["text"] for r in csv.DictReader(open(SUMMARIES, encoding="utf-8")) if r["text"]}
 except FileNotFoundError:
     summaries = {}  # the page then has no "what happened" recaps; summary_src.py dumps the texts to write them from
-    print(f"no {SUMMARIES}: building without summaries")
+    print(f"no {SUMMARIES.as_posix()}: building without summaries")
 
 
 # map cards only: the entry books and chapter cards are never laid on the table
@@ -187,11 +198,12 @@ data = json.dumps(out, ensure_ascii=False, separators=(",", ":"))
 open(sys.argv[2], "w", encoding="utf-8").write(data)
 page = open("guide_template.html", encoding="utf-8").read()
 logic = open("guide_logic.js", encoding="utf-8").read()
-# page strings: {{key}} in the template, from ui.json {key: {lang: text}}; an untranslated string falls back to English
-ui = json.load(open("ui.json", encoding="utf-8"))
-untranslated = sorted(k for k in ui if LANG not in ui[k])
-if untranslated:
-    print(f"{len(untranslated)} page strings have no {LANG} text in ui.json, English used:", ", ".join(untranslated))
-page = re.sub(r"\{\{(\w+)\}\}", lambda m: ui[m[1]].get(LANG, ui[m[1]]["en"]), page)
+# page strings: {{key}} in the template, from ui.json {key: text}; a key the language lacks comes from the default
+ui = json.load(open(Path("lang", DEFAULT, "ui.json"), encoding="utf-8"))
+own = json.load(open(lang_file("ui.json"), encoding="utf-8"))
+if ui.keys() - own.keys():
+    print(f"page strings missing from lang/{LANG}/ui.json, {DEFAULT} used:", ", ".join(sorted(ui.keys() - own.keys())))
+ui.update(own)
+page = re.sub(r"\{\{(\w+)\}\}", lambda m: ui[m[1]], page)
 open(sys.argv[3], "w", encoding="utf-8").write(page.replace("/*DATA*/", data).replace("/*LOGIC*/", logic))
 print(f"{len(gates)} gates, {len(leads)} of {sum(len(v['leads']) for v in V.values())} leads keyed ({LANG})")
