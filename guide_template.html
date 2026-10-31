@@ -1,3 +1,11 @@
+<!doctype html>
+<html lang="pl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6b5a">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <title>Tropy Królów Ruin</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -361,6 +369,9 @@ document.getElementById("linkYes").onclick = () => {
 };
 document.getElementById("linkNo").onclick = () => { document.getElementById("fromLink").hidden = true; };
 window.addEventListener("hashchange", checkLink);
+// the service worker makes the page installable; claude.ai's sandboxed frame cannot register one
+if ("serviceWorker" in navigator && !/claude/.test(location.hostname))
+  navigator.serviceWorker.register("/sw.js").catch(() => {});
 
 document.getElementById("copyCode").onclick = () => {
   const box = document.getElementById("code"), msg = document.getElementById("copyMsg");
