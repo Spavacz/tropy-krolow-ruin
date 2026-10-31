@@ -5,8 +5,8 @@ Usage: python -I -X utf8 guide.py statusmap.json [LANG ...]
 Each LANG is a language code of the app's database with a folder lang/<LANG>/ of hand-written files (ui.json,
 summaries.csv, leads_extra.csv); without arguments every such language is built. English, the default, goes to
 guide.html and guide_data.json, any other language to guide_<LANG>.html and guide_data_<LANG>.json. Every page links
-to all languages with a folder. A file a folder lacks is read from lang/en/, except summaries.csv: recaps in another
-language would not help, so the page is then built without them.
+to all languages with a folder. A file a folder lacks is read from lang/en/; for summaries.csv that means a page
+without its own recaps shows the English ones rather than none.
 A gate is a choice that needs a status (or a chapter, or a character) and can still lead to a status part not yet owned;
 the page shows the open ones. Leads are the game's own "New Lead" lines, keyed to the status parts
 gained right around them, so the page shows those whose thread has not moved on since.
@@ -40,7 +40,7 @@ def data_name(lang):
 
 def lang_file(lang, name):
     own = Path("lang", lang, name)
-    if own.exists() or name == "summaries.csv":
+    if own.exists():
         return own
     print(f"no {own.as_posix()}: using lang/{DEFAULT}/{name}")
     return Path("lang", DEFAULT, name)

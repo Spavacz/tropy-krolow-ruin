@@ -55,7 +55,7 @@ The language code is the one the app's database uses. The campaign is translated
 
 The hand-written files of each language sit in their own folder, `lang/<code>/`. Every language above already has
 one with the page strings (`ui.json`); `pl` and `en` have summaries. A folder is read when its language is chosen. A file the folder lacks is read from `lang/en/`, the
-complete default, except `summaries.csv` (see below). Each part of the page comes from its own place:
+complete default. Each part of the page comes from its own place:
 
 - **Game texts** (option names, location and status names, the game's "New Lead" hints) come from the database in
   the chosen language, so there is nothing to write. A status name the translation does not quote recognisably stays
@@ -67,8 +67,8 @@ complete default, except `summaries.csv` (see below). Each part of the page come
   `lang` to the page's BCP 47 language tag (e.g. `de`), which also drives alphabetical sorting.
 - **Summaries** ("what has happened", one or two sentences per status part) are written by hand in
   `lang/<code>/summaries.csv`, with the columns of `lang/pl/summaries.csv` (`status` in English, `part`, `text`;
-  an empty `text` marks a purely mechanical part). This file is never borrowed from another language: without it
-  the page is built without that section. To write one, dump the game text where each part is gained, in batches:
+  an empty `text` marks a purely mechanical part). Without the file, the page shows the English summaries in that
+  section. To write one, dump the game text where each part is gained, in batches:
 
   ```
   python -I -X utf8 summary_src.py statusmap.json <folder> 40 de

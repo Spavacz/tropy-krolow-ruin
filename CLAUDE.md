@@ -66,7 +66,7 @@ node guide_test.js guide_data.json                 # i guide_data_<kod>.json dla
   „-łeś/-łaś”), tylko to, co już się wydarzyło. Brakujące części po zmianie danych wypisze
   `summary_src.py statusmap.json <katalog> 40`. Inny język ma własny plik (`lang/<kod>/summaries.csv`, z
   `summary_src.py … 40 <kod>`), pisany z tekstu gry w tym języku, a nie tłumaczony. Są `pl` i `en` (en pisane z angielskiego tekstu gry).
-  Pliki ręczne leżą w `lang/<kod>/`; brakujący plik guide.py bierze z `lang/en/` (domyślny), poza streszczeniami.
+  Pliki ręczne leżą w `lang/<kod>/`; brakujący plik guide.py bierze z `lang/en/` (domyślny), także streszczenia: język bez własnych pokazuje angielskie.
   Każdy język kampanii ma `lang/<kod>/ui.json` (tłumaczenia napisów strony); build odrzuca w nich " ' ` \ < >.
 - `lang/en/leads_extra.csv` (wspólny dla wszystkich języków, `starts` to początek angielskiego tekstu): wskazówki z ręcznie dobranym warunkiem pokazania (`show`) i zniknięcia (`hide`),
   alternatywy oddzielone `;`. Wiersz nadpisuje też automatycznie przypiętą wskazówkę. Używaj, gdy
