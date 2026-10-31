@@ -19,7 +19,15 @@ db, out = Path(sys.argv[1]), Path(sys.argv[2])
 con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
 
 
-def clean(t):
+FR = 7
+# French marks a status name in bold ("le statut <b>Topographie</b>"), not in quotes: quote it before the tags go,
+# so the name vote below can pair it with the English one
+BOLD_NAME = re.compile(r"(statuts?\s*(?:</?b>\s*)*)<b>\s*([^<]+?)\s*</b>")
+
+
+def clean(t, lang=None):
+    if lang == FR:
+        t = BOLD_NAME.sub(r"\1« \2 »", t or "")
     t = re.sub(r"<[^>]*>|@\w+@", " ", t or "")
     t = re.sub(r"\s*\((Chapter [^)]*)\)\s*”", r": \1”", t)  # keep "(" inside a status name from splitting clauses
     t = t.replace("''", "”")  # one text closes a status name with two apostrophes
@@ -27,7 +35,7 @@ def clean(t):
 
 
 def texts(lang):
-    return {e: clean(t) for e, t in con.execute("select _idElem, text from ElemetText where _idLang=?", (lang,))}
+    return {e: clean(t, lang) for e, t in con.execute("select _idElem, text from ElemetText where _idLang=?", (lang,))}
 
 
 # every language the app ships text for, by its code in the Languages table (en, pl, de, fr, ...)
@@ -37,7 +45,7 @@ LANGS = {code: i for i, _, code, *_ in con.execute("select * from Languages")
              (CAMP, i)).fetchone()}
 T = {code: texts(i) for code, i in LANGS.items()}
 en, pl = T["en"], T["pl"]
-choice_txt = {(ch, lang): (clean(r), clean(s)) for ch, lang, r, s in con.execute(
+choice_txt = {(ch, lang): (clean(r, lang), clean(s, lang)) for ch, lang, r, s in con.execute(
     "select _idChoice, _idLang, reqTxt, resTxt from ChoiceInfoText")}
 
 loc_num = dict(con.execute("select _id, displayNumber from Location where _campId=?", (CAMP,)))
