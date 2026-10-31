@@ -7,7 +7,6 @@
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <title>Tropy Królów Ruin</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
 <style>
@@ -23,7 +22,7 @@
 :root[data-theme="dark"] {
   --bg: #121715; --panel: #1a211e; --fg: #e3e8e0; --muted: #98a59c; --line: #2c3631;
   --accent: #74b8a1; --on-accent: #0e1412; --lead: #e0c27c; --lead-bg: #2a2416; color-scheme: dark }
-/* author display rules (.banner is flex) beat the browser's own [hidden]; the claude.ai frame used to add this */
+/* author display rules (.banner is flex) beat the browser's own [hidden] */
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.45 var(--body);
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -319,10 +318,8 @@ function fromCode(code) {
   return { owned: s.owned, ch: { n: +s.ch.n, letter: s.ch.letter === "A" || s.ch.letter === "B" ? s.ch.letter : "", part: +s.ch.part || 0 },
     heroes: (s.heroes || []).filter(h => HEROES.includes(h)), onMap: (s.onMap || []).map(Number).filter(Number.isFinite), sample: false };
 }
-// link with the state in its #hash; the artifact link carries a plain #name, so the code is letters, digits and "-"
-// inside a claude.ai artifact the page runs in a sandboxed frame whose location is not the shareable link
-const PAGE_URL = /claude/.test(location.hostname) ? "https://claude.ai/artifact/ND3eEQjjzcQHJgEhprWtAP"
-  : location.origin + location.pathname;
+// link with the state in its #hash
+const PAGE_URL = location.origin + location.pathname;
 document.getElementById("copyLink").onclick = () => {
   const msg = document.getElementById("linkMsg"), code = encodeState(DATA, state), url = PAGE_URL + "#" + code;
   try { history.replaceState(null, "", "#" + code); } catch (e) {}
@@ -371,8 +368,8 @@ document.getElementById("linkYes").onclick = () => {
 };
 document.getElementById("linkNo").onclick = () => { document.getElementById("fromLink").hidden = true; };
 window.addEventListener("hashchange", checkLink);
-// the service worker makes the page installable; claude.ai's sandboxed frame cannot register one
-if ("serviceWorker" in navigator && !/claude/.test(location.hostname))
+// the service worker makes the page installable
+if ("serviceWorker" in navigator)
   navigator.serviceWorker.register("/sw.js").catch(() => {});
 
 document.getElementById("copyCode").onclick = () => {

@@ -3,7 +3,6 @@
 Odpowiadaj użytkownikowi po polsku. To strona bez spoilerów do gry planszowej Tainted Grail: Królowie Ruin
 (aplikacja Companion, kampania 26). Gracz zaznacza statusy z papierowego arkusza, a strona pokazuje, co się
 działo i dokąd iść. Jest hostowana na Netlify: https://taintedgrail.netlify.app (instalowalna jako aplikacja).
-Starsza kopia to artefakt claude.ai https://claude.ai/artifact/ND3eEQjjzcQHJgEhprWtAP.
 
 Siostrzany projekt to polski lektor w `C:\Workspace\tgrail`. W jego katalogu leżą dane z telefonu,
 z których korzysta też ta strona.
@@ -47,9 +46,9 @@ node guide_test.js guide_data.json
 - `guide_logic.js` to logika współdzielona przez stronę i testy: warunki, rozdziały, liczniki, wskazówki,
   kodowanie stanu do linku. `guide_test.js` zawiera testy na prawdziwych danych.
 - Publikacja: Netlify z repo GitHub (`netlify.toml`: bez kroku budowania, `/` serwuje `guide.html`), więc
-  wystarczy commit i push gotowego `guide.html`. Stary artefakt claude.ai nadal działa (Artifact z
-  `file_path` = `guide.html`). `PAGE_URL` w szablonie bierze adres strony z `location`, a na claude.ai
-  używa wpisanego adresu artefaktu, bo tam strona siedzi w ramce o innym adresie.
+  wystarczy commit i push gotowego `guide.html`. `PAGE_URL` w szablonie bierze adres strony z `location`.
+  Artefakt claude.ai został usunięty; ramka artefaktu dawała domyślne style (viewport, `[hidden]`, margines
+  `body`), które strona ma teraz sama.
 
 ## Dane pisane ręcznie (reszta jest generowana)
 
@@ -67,8 +66,7 @@ node guide_test.js guide_data.json
 - **Nie osadzać tekstów z gry** na stronie, tylko numery wpisów („lokacja 155, wers 8”, „KT wpis 503”).
   Krótkie cytaty (treść wskazówek, nazwy opcji i lokacji) zostają.
 - Strona startuje **pusta**. Stan jest zapisany w `localStorage`. Link `#t<wersja>-<base36>` przenosi stan
-  i wczytuje się sam, gdy nic nie jest zaznaczone, a w przeciwnym razie pyta. Działa przez claude.ai,
-  co użytkownik potwierdził. Wersja to skrót układu statusów i lokacji, więc przebudowa danych z nowymi
+  i wczytuje się sam, gdy nic nie jest zaznaczone, a w przeciwnym razie pyta. Wersja to skrót układu statusów i lokacji, więc przebudowa danych z nowymi
   statusami unieważnia stare linki (strona to zgłasza).
 - Mapa: gracz zaznacza lokacje leżące na stole. Rady i wskazówki są filtrowane po miejscu, w którym
   padły, **i** po miejscach, do których prowadzą (numery i odmienione nazwy w tekście).
