@@ -52,7 +52,7 @@ The language code is the one the app's database uses. The campaign is translated
 `de`, `it`, `ru` and `cn`; `statusmap.py` prints the list it found.
 
 The hand-written files of each language sit in their own folder, `lang/<code>/`. Every language above already has
-one with the page strings (`ui.json`); only `pl` has summaries. A folder is read when its language is chosen. A file the folder lacks is read from `lang/pl/`, the
+one with the page strings (`ui.json`); `pl` and `en` have summaries. A folder is read when its language is chosen. A file the folder lacks is read from `lang/pl/`, the
 complete default, except `summaries.csv` (see below). Each part of the page comes from its own place:
 
 - **Game texts** (option names, location and status names, the game's "New Lead" hints) come from the database in

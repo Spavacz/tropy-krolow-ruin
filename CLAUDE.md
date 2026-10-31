@@ -62,7 +62,7 @@ node guide_test.js guide_data.json                 # i guide_data_<kod>.json dla
   pusty tekst oznacza część czysto mechaniczną). Styl: 1–2 zdania, **formy neutralne płciowo** (bez
   „-łeś/-łaś”), tylko to, co już się wydarzyło. Brakujące części po zmianie danych wypisze
   `summary_src.py statusmap.json <katalog> 40`. Inny język ma własny plik (`lang/<kod>/summaries.csv`, z
-  `summary_src.py … 40 <kod>`), pisany z tekstu gry w tym języku, a nie tłumaczony. Angielskiego celowo nie ma w repo.
+  `summary_src.py … 40 <kod>`), pisany z tekstu gry w tym języku, a nie tłumaczony. Są `pl` i `en` (en pisane z angielskiego tekstu gry).
   Pliki ręczne leżą w `lang/<kod>/`; brakujący plik guide.py bierze z `lang/pl/`, poza streszczeniami.
   Każdy język kampanii ma `lang/<kod>/ui.json` (tłumaczenia napisów strony); build odrzuca w nich " ' ` \ < >.
 - `lang/pl/leads_extra.csv`: wskazówki z ręcznie dobranym warunkiem pokazania (`show`) i zniknięcia (`hide`),
