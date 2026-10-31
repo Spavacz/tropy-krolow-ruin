@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 CAMP, EN, PL = 26, 1, 2
+SKIP = {"tst"}  # the app's test language
 
 db, out = Path(sys.argv[1]), Path(sys.argv[2])
 con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
@@ -29,12 +30,18 @@ def texts(lang):
     return {e: clean(t) for e, t in con.execute("select _idElem, text from ElemetText where _idLang=?", (lang,))}
 
 
-en, pl = texts(EN), texts(PL)
+# every language the app ships text for, by its code in the Languages table (en, pl, de, fr, ...)
+LANGS = {code: i for i, _, code, *_ in con.execute("select * from Languages")
+         if code not in SKIP and con.execute(  # some translations (cz, kr) lack this campaign altogether
+             "select 1 from LocationTexts t join Location l on l._id=t._idLoc where l._campId=? and t._idLang=? limit 1",
+             (CAMP, i)).fetchone()}
+T = {code: texts(i) for code, i in LANGS.items()}
+en, pl = T["en"], T["pl"]
 choice_txt = {(ch, lang): (clean(r), clean(s)) for ch, lang, r, s in con.execute(
-    "select _idChoice, _idLang, reqTxt, resTxt from ChoiceInfoText where _idLang in (?, ?)", (EN, PL))}
+    "select _idChoice, _idLang, reqTxt, resTxt from ChoiceInfoText")}
 
 loc_num = dict(con.execute("select _id, displayNumber from Location where _campId=?", (CAMP,)))
-verses = {vid: {"loc": loc_num[l], "num": n, "text_pl": "", "text_en": "", "leads": [], "gains": [], "choices": []}
+verses = {vid: {"loc": loc_num[l], "num": n, **{"text_" + c: "" for c in LANGS}, "leads": [], "gains": [], "choices": []}
           for vid, l, n in con.execute("select _id, _locationId, displayNumber from Verse") if l in loc_num}
 
 ALIAS = {"s mall favor": "Small Favor", "small favors": "Small Favor", "times passes": "Time Passes"}  # typos in the source texts
@@ -45,7 +52,7 @@ HERO = r"(Elgan|Gerdwyn|Iunis|Osbert)"
 # "requires Elgan or Gerdwyn", "If you're playing Iunis", "If Osbert is in this Location"
 HEROES = re.compile(rf"(?:requires|playing|[Ii]f)\s+{HERO}(?:\s*(?:,\s*|\s+or\s+){HERO})?(?:\s+or\s+{HERO})?")
 VERB = re.compile(r"\b(gain|don’t have|don't have|do not have|lack|have|requires?)\b", re.I)
-LEAD = re.compile(r"(?:Nowa Wskazówka|New Lead):\s*(.+)", re.I)  # the game's own spoiler-free pointers
+LEAD_EN = re.compile(r"New Lead:\s*(.+)", re.I)  # the game's own spoiler-free pointers
 CHAPTER = re.compile(r"playing (Chapter [^,.)]*?)(?=\s*(?:,|\.|\)|$| or if| and))")
 
 
@@ -84,16 +91,32 @@ def split(ms):
     return conds, gains
 
 
-# EN status name -> PL, voted over elements whose EN and PL mention the same number of statuses
-PL_NAME = re.compile(r"„\s*([^”\"]+?)\s*[”\"]")
-votes = collections.defaultdict(collections.Counter)
+def lead_mark(code):
+    """Each translation names "New Lead" in its own words, in bold; take the bold phrase most common in the
+    elements whose English has one ("Nowa Wskazówka", "Neue Spur", "新线索")."""
+    seen = collections.Counter()
+    for e in (e for e, t in en.items() if LEAD_EN.search(t)):
+        for (raw,) in con.execute("select text from ElemetText where _idElem=? and _idLang=?", (e, LANGS[code])):
+            seen.update({m.strip(" :：") for m in re.findall(r"<b>([^<]{2,40}?)</b>", raw or "")} - {""})
+    return seen.most_common(1)[0][0] if seen else None  # a partial translation may have no lead texts
 
 
-def vote(t_en, t_pl):
-    a, b = [m[1] for m in mentions(t_en)], PL_NAME.findall(t_pl)
-    if a and len(a) == len(b):
-        for x, y in zip(a, b):
-            votes[x][y] += 1
+MARK = {code: lead_mark(code) for code in LANGS}
+LEAD = {code: re.compile(re.escape(m or "(no lead mark)") + r"\s*[:：]\s*(.+)", re.I) for code, m in MARK.items()}
+
+# EN status name -> translated name, voted over elements whose EN and translation mention the same number of statuses
+QUOTED = {"pl": re.compile(r"„\s*([^”\"]+?)\s*[”\"]")}
+ANY_QUOTE = re.compile(r"[„“«‹「『\"]\s*([^„“”«»‹›「」『』\"]+?)\s*[”“»›」』\"]")  # quote styles of the other translations
+votes = {code: collections.defaultdict(collections.Counter) for code in LANGS if code != "en"}
+
+
+def vote(t_en, tr):
+    a = [m[1] for m in mentions(t_en)]
+    for code, t in tr.items():
+        b = QUOTED.get(code, ANY_QUOTE).findall(t)
+        if code in votes and a and len(a) == len(b):
+            for x, y in zip(a, b):
+                votes[code][x][y] += 1
 
 
 unknown = collections.Counter()
@@ -101,49 +124,55 @@ for eid, vid, typ in con.execute("select _id, _idVer, type from VerseElements or
     if vid not in verses:
         continue
     v, t = verses[vid], en.get(eid, "")
-    vote(t, pl.get(eid, ""))
+    vote(t, {code: T[code].get(eid, "") for code in LANGS})
     unknown.update(s for verb, s, *_ in mentions(t) if verb == "?")
     chs = con.execute("select _id, _idTargetVer from ChoiceInfo where _elemId=?", (eid,)).fetchall()
     if typ == 0 and not chs:
-        v["text_pl"] += ("\n\n" if v["text_pl"] else "") + pl.get(eid, "")
-        v["text_en"] += ("\n\n" if v["text_en"] else "") + t
+        for code in LANGS:
+            v["text_" + code] += ("\n\n" if v["text_" + code] else "") + T[code].get(eid, "")
         v["gains"] += split(mentions(t))[1]
-        # paired by element; a side the translation lacks stays "" and the page falls back to the other
-        v["leads"] += [{"pl": a, "en": b} for a, b in
-                       itertools.zip_longest(LEAD.findall(pl.get(eid, "")), LEAD.findall(t), fillvalue="")]
+        # paired by element; a lead a translation lacks stays "" there and is left out of that language's page
+        found = [LEAD[code].findall(T[code].get(eid, "")) for code in LANGS]
+        v["leads"] += [dict(zip(LANGS, row)) for row in itertools.zip_longest(*found, fillvalue="")]
         continue
     for ch, target in chs:
         req, res = choice_txt.get((ch, EN), ("", ""))
+        result = {code: choice_txt.get((ch, i), ("", ""))[1] for code, i in LANGS.items()}
         conds, _ = split(mentions(t) + mentions(req))
         _, gains = split(mentions(res) + mentions(req))
-        vote(res, choice_txt.get((ch, PL), ("", ""))[1])
+        vote(res, result)
         chapter = CHAPTER.findall(t)
         heroes = sorted({h for m in HEROES.findall(t) for h in m if h})
-        if "podpowied" in pl.get(eid, ""):  # "If you want to see a Hint, click here"
-            v["leads"].append({"pl": choice_txt.get((ch, PL), ("", ""))[1], "en": res})
+        # the Polish wording marks a hint choice ("Podążaj za podpowiedziami Orrina"); the English varies
+        if "podpowied" in pl.get(eid, ""):
+            v["leads"].append(result)
         v["choices"].append({
             "kind": {-1: "auto", 1: "branch", 2: "option"}.get(typ, "text"),
-            "label_pl": pl.get(eid, ""), "label_en": t,
+            **{"label_" + code: T[code].get(eid, "") for code in LANGS},
             "conds": conds, "chapter": chapter, "heroes": heroes, "gains": gains,
-            "result_pl": choice_txt.get((ch, PL), ("", ""))[1], "result_en": res,
+            **{"result_" + code: r for code, r in result.items()},
             "target": target if target in verses else None,
         })
 
-names = {s: c.most_common(1)[0][0] for s, c in votes.items()}
+names = {code: {s: c.most_common(1)[0][0] for s, c in vs.items()} for code, vs in votes.items()}
 all_status = {s for v in verses.values() for s, *_ in v["gains"]} | {
     s for v in verses.values() for c in v["choices"] for s, *_ in c["conds"] + c["gains"]}
-missing = sorted(all_status - names.keys())
+
 
 def loc_names(lang):
     return {n: name for i, n in loc_num.items()
             for (name,) in con.execute("select name from LocationTexts where _idLoc=? and _idLang=?", (i, lang))}
 
 
-json.dump({"names_pl": names, "loc_names": loc_names(PL), "loc_names_en": loc_names(EN), "verses": verses}, out.open("w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump({"langs": list(LANGS), "names": names, "loc_names": {code: loc_names(i) for code, i in LANGS.items()},
+           "verses": verses}, out.open("w", encoding="utf-8"), ensure_ascii=False, indent=0)
 
 gained = {s for v in verses.values() for s, *_ in v["gains"] + [g for c in v["choices"] for g in c["gains"]]}
 needed = {s for v in verses.values() for c in v["choices"] for s, *_ in c["conds"]}
 print(f"{len(verses)} verses, {len(all_status)} statuses ({len(gained)} gained, {len(needed)} checked)")
 print("checked but never gained:", sorted(needed - gained))
-print("no Polish name:", missing)
+print("languages:", ", ".join(LANGS), "| lead marks:", MARK)
+for code, ns in names.items():
+    if all_status - ns.keys():
+        print(f"no {code} name:", sorted(all_status - ns.keys()))
 print("mentions with no verb:", unknown.most_common(15))

@@ -1,10 +1,11 @@
 """Build guide_data.json for the status guide page from statusmap.json.
 
-Usage: python -I -X utf8 guide.py statusmap.json guide_data.json guide.html [pl|en]
+Usage: python -I -X utf8 guide.py statusmap.json guide_data.json guide.html [LANG]
 
-The language (default pl) picks the game texts, summaries.csv or summaries_en.csv, and the page strings in ui.json.
+LANG (default pl) is a language code of the app's database; it picks the game texts, summaries.csv (pl) or
+summaries_<LANG>.csv, and the page strings in ui.json.
 A gate is a choice that needs a status (or a chapter, or a character) and can still lead to a status part not yet owned;
-the page shows the open ones. Leads are the game's own "Nowa Wskazówka" lines, keyed to the status parts
+the page shows the open ones. Leads are the game's own "New Lead" lines, keyed to the status parts
 gained right around them, so the page shows those whose thread has not moved on since.
 """
 import collections
@@ -17,7 +18,7 @@ d = json.load(open(sys.argv[1], encoding="utf-8"))
 V = {int(k): v for k, v in d["verses"].items()}
 BOOKS = {999, 1001}  # entry books: reached from map locations, never walked to
 LANG = sys.argv[4] if len(sys.argv) > 4 else "pl"
-assert LANG in ("pl", "en"), LANG
+assert LANG in d["langs"], f"{LANG} is not one of the app's languages: {d['langs']}"
 
 
 def chapter(s):
@@ -145,8 +146,8 @@ except FileNotFoundError:
 
 
 # map cards only: the entry books and chapter cards are never laid on the table
-loc_names = {n: name for n, name in d["loc_names"].items() if int(n) not in BOOKS and int(n) < 1100}
-shown_names = loc_names if LANG == "pl" else {n: d["loc_names_en"].get(n, nm) for n, nm in loc_names.items()}
+loc_names = {n: name for n, name in d["loc_names"]["pl"].items() if int(n) not in BOOKS and int(n) < 1100}
+shown_names = {n: d["loc_names"][LANG].get(n, nm) for n, nm in loc_names.items()}
 
 
 def name_pattern(name):
@@ -171,7 +172,8 @@ for v in V.values():
         if f"{st}|{p}" in summaries and at not in sources[f"{st}|{p}"]:
             sources[f"{st}|{p}"].append(at)
 
-# entries that close a chapter part: they send the party to "Rozdział 7B: Część 3", or end a whole chapter
+# entries that close a chapter part: they send the party to "Rozdział 7B: Część 3", or end a whole chapter;
+# read from the Polish text, which every database has, and the keys hold no text, so this serves every language
 chapter_texts = collections.defaultdict(list)
 for v in V.values():
     text = "\n\n".join([v["text_pl"]] + [c["result_pl"] for c in v["choices"] if c["result_pl"]])
@@ -180,13 +182,16 @@ for v in V.values():
     for k in sorted(keys):  # sets iterate in a per-run order; keep the output byte-stable
         chapter_texts[k].append(f'{v["loc"]}/{v["num"]}')
 
-out = {"names": d["names_pl"] if LANG == "pl" else {}, "loc_names": shown_names, "max_part": max_part, "gates": gates, "leads": leads, "summaries": summaries, "sources": sources, "chapter_refs": chapter_texts}
+out = {"names": d["names"].get(LANG, {}), "loc_names": shown_names, "max_part": max_part, "gates": gates, "leads": leads, "summaries": summaries, "sources": sources, "chapter_refs": chapter_texts}
 data = json.dumps(out, ensure_ascii=False, separators=(",", ":"))
 open(sys.argv[2], "w", encoding="utf-8").write(data)
 page = open("guide_template.html", encoding="utf-8").read()
 logic = open("guide_logic.js", encoding="utf-8").read()
-# page strings: {{key}} in the template, from ui.json {key: {pl, en}}; a missing key or language fails the build
+# page strings: {{key}} in the template, from ui.json {key: {lang: text}}; an untranslated string falls back to English
 ui = json.load(open("ui.json", encoding="utf-8"))
-page = re.sub(r"\{\{(\w+)\}\}", lambda m: ui[m[1]][LANG], page)
+untranslated = sorted(k for k in ui if LANG not in ui[k])
+if untranslated:
+    print(f"{len(untranslated)} page strings have no {LANG} text in ui.json, English used:", ", ".join(untranslated))
+page = re.sub(r"\{\{(\w+)\}\}", lambda m: ui[m[1]].get(LANG, ui[m[1]]["en"]), page)
 open(sys.argv[3], "w", encoding="utf-8").write(page.replace("/*DATA*/", data).replace("/*LOGIC*/", logic))
 print(f"{len(gates)} gates, {len(leads)} of {sum(len(v['leads']) for v in V.values())} leads keyed ({LANG})")

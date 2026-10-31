@@ -39,6 +39,6 @@ out.mkdir(parents=True, exist_ok=True)
 for i in range(0, len(todo), size):
     with open(out / f"batch{i // size + 1:02}.txt", "w", encoding="utf-8") as f:
         for s, p in todo[i:i + size]:
-            f.write(f"\n##### {s} | {p} | {d['names_pl'].get(s, s) if lang == 'pl' else s}\n")
+            f.write(f"\n##### {s} | {p} | {d['names'].get(lang, {}).get(s, s)}\n")
             f.write("\n---\n".join(src[(s, p)][:2]) + "\n")
 print(len(todo), "parts to summarize in", -(-len(todo) // size), "batches")

@@ -45,7 +45,8 @@ node guide_test.js guide_data.json
   wpisów i wstawia dane z logiką do `guide_template.html`, co daje samodzielny `guide.html`.
 - Język strony wybiera się przy budowaniu (`guide.py … guide.html en`, domyślnie `pl`), a nie na stronie:
   na Netlify idzie tylko polski `guide.html`. Napisy strony są w `ui.json` (`{{klucz}}` w szablonie, w HTML
-  i w literałach JS, więc teksty bez `"` i `` ` ``). `statusmap.json` trzyma teksty gry w obu językach.
+  i w literałach JS, więc teksty bez `"` i `` ` ``). `statusmap.json` trzyma teksty gry we wszystkich językach kampanii (en, pl, fr, es, de, it, ru, cn).
+  Znacznik „New Lead” każdego tłumaczenia jest wykrywany sam (najczęstsze pogrubienie przy angielskim „New Lead”).
   Testy dopasowują po miejscu i warunku, nie po etykiecie, żeby działały w każdym języku.
 - `guide_logic.js` to logika współdzielona przez stronę i testy: warunki, rozdziały, liczniki, wskazówki,
   kodowanie stanu do linku. `guide_test.js` zawiera testy na prawdziwych danych.
