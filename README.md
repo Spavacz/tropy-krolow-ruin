@@ -38,7 +38,9 @@ node guide_test.js guide_data.json
 
 `guide.py` builds every language that has a `lang/<code>/` folder: English into `guide.html` and
 `guide_data.json`, the others into `guide_<code>.html` and `guide_data_<code>.json` (test those the same way).
-Every page's switch lists all of them.
+Every page's switch lists all of them. Each language also gets its own web app manifest
+(`manifest.webmanifest`, `manifest_<code>.webmanifest`), so the installed app is named in that language
+(`title` and `short_name` in `ui.json`) and opens on its page.
 
 ## Building in another language
 

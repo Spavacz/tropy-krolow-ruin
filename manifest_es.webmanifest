@@ -1,0 +1,25 @@
+{
+  "name": "Rastros de los Reyes de la Ruina",
+  "short_name": "Rastros",
+  "description": "Aplicación de apoyo no oficial para la campaña Tainted Grail: Kings of Ruin.",
+  "lang": "es",
+  "start_url": "/guide_es.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#eef0ea",
+  "theme_color": "#2f6b5a",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -30,6 +30,10 @@ def page_name(lang):
     return "guide.html" if lang == DEFAULT else f"guide_{lang}.html"
 
 
+def manifest_name(lang):
+    return "manifest.webmanifest" if lang == DEFAULT else f"manifest_{lang}.webmanifest"
+
+
 def data_name(lang):
     return "guide_data.json" if lang == DEFAULT else f"guide_data_{lang}.json"
 
@@ -222,8 +226,17 @@ def build(LANG):
     bad = {k: t for k, t in ui.items() if re.search(r"[\"'`\\<>]", t)}
     assert not bad, f"lang/{LANG}/ui.json strings must not contain \" ' ` \\ < >: {bad}"
     # the language switch: every language's own name, linking to its page
+    ui["manifest"] = manifest_name(LANG)
     ui["lang_options"] = "".join(f'<option value="{page_name(c)}" data-lang="{TAGS[c]}"{" selected" if c == LANG else ""}>{NAMES[c]}</option>' for c in ALL)
     page = re.sub(r"\{\{(\w+)\}\}", lambda m: ui[m[1]], page)
+    # each language installs as its own app, named in that language and opening on its page
+    manifest = {"name": ui["title"], "short_name": ui["short_name"], "description": ui["tagline"], "lang": ui["lang"],
+                "start_url": "/" if LANG == DEFAULT else "/" + page_name(LANG), "scope": "/", "display": "standalone",
+                "background_color": "#eef0ea", "theme_color": "#2f6b5a",
+                "icons": [{"src": f"/icon-{n}.png", "sizes": f"{n}x{n}", "type": "image/png", "purpose": "any maskable"} for n in (192, 512)]}
+    with open(manifest_name(LANG), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+        f.write("\n")
     open(page_name(LANG), "w", encoding="utf-8").write(page.replace("/*DATA*/", data).replace("/*LOGIC*/", logic))
     print(f"{len(gates)} gates, {len(leads)} of {sum(len(v['leads']) for v in V.values())} leads keyed ({LANG})")
 

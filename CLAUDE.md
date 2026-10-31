@@ -52,6 +52,8 @@ node guide_test.js guide_data.json                 # i guide_data_<kod>.json dla
   Testy dopasowują po miejscu i warunku, nie po etykiecie, żeby działały w każdym języku.
 - `guide_logic.js` to logika współdzielona przez stronę i testy: warunki, rozdziały, liczniki, wskazówki,
   kodowanie stanu do linku. `guide_test.js` zawiera testy na prawdziwych danych.
+- Manifesty PWA też generuje guide.py, jeden na język (`manifest_<kod>.webmanifest`, angielski bez sufiksu):
+  nazwa z `title`/`short_name` w `ui.json`, start na stronie danego języka. Nie edytować ich ręcznie.
 - Publikacja: Netlify z repo GitHub (`netlify.toml`: bez kroku budowania, `/` serwuje `guide.html`), więc
   wystarczy commit i push gotowych `guide*.html`. `PAGE_URL` w szablonie bierze adres strony z `location`.
   Artefakt claude.ai został usunięty; ramka artefaktu dawała domyślne style (viewport, `[hidden]`, margines
