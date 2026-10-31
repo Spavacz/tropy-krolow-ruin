@@ -3,9 +3,9 @@
 Usage: python -I -X utf8 guide.py statusmap.json [LANG ...]
 
 Each LANG is a language code of the app's database with a folder lang/<LANG>/ of hand-written files (ui.json,
-summaries.csv, leads_extra.csv); without arguments every such language is built. Polish, the default, goes to
+summaries.csv, leads_extra.csv); without arguments every such language is built. English, the default, goes to
 guide.html and guide_data.json, any other language to guide_<LANG>.html and guide_data_<LANG>.json. Every page links
-to all languages with a folder. A file a folder lacks is read from lang/pl/, except summaries.csv: recaps in another
+to all languages with a folder. A file a folder lacks is read from lang/en/, except summaries.csv: recaps in another
 language would not help, so the page is then built without them.
 A gate is a choice that needs a status (or a chapter, or a character) and can still lead to a status part not yet owned;
 the page shows the open ones. Leads are the game's own "New Lead" lines, keyed to the status parts
@@ -21,7 +21,7 @@ from pathlib import Path
 d = json.load(open(sys.argv[1], encoding="utf-8"))
 V = {int(k): v for k, v in d["verses"].items()}
 BOOKS = {999, 1001}  # entry books: reached from map locations, never walked to
-DEFAULT = "pl"  # the complete folder, and the page Netlify serves at /
+DEFAULT = "en"  # the complete folder, and the page Netlify serves at /
 ALL = [c for c in d["langs"] if Path("lang", c).is_dir()]
 assert DEFAULT in ALL, ALL
 
@@ -171,10 +171,11 @@ def build(LANG):
 
 
     # a row may also override an automatically keyed lead whose quest ends in another status; ";" separates alternatives
-    for r in csv.DictReader(open(lang_file(LANG, "leads_extra.csv"), encoding="utf-8")):
+    extra = lang_file(LANG, "leads_extra.csv")
+    for r in csv.DictReader(open(extra, encoding="utf-8")):
         v = next(v for v in V.values() if f'{v["loc"]}/{v["num"]}' == r["at"])
-        # "starts" is Polish; the element it finds gives the text in either language
-        text = next(t for t in v["leads"] if t["pl"].startswith(r["starts"]))[LANG]
+        # "starts" is in the language of the folder the file came from; the lead it finds has every language
+        text = next(t for t in v["leads"] if t[extra.parent.name].startswith(r["starts"]))[LANG]
         leads = [l for l in leads if (l["at"], l["text"]) != (r["at"], text)]
         leads.append({"at": r["at"], "text": text, "keys": [part_key(k) for k in r["show"].split(";")],
                       "hide": [part_key(k) for k in r["hide"].split(";")]})
@@ -221,13 +222,15 @@ def build(LANG):
     bad = {k: t for k, t in ui.items() if re.search(r"[\"'`\\<>]", t)}
     assert not bad, f"lang/{LANG}/ui.json strings must not contain \" ' ` \\ < >: {bad}"
     # the language switch: every language's own name, linking to its page
-    ui["lang_options"] = "".join(f'<option value="{page_name(c)}"{" selected" if c == LANG else ""}>{NAMES[c]}</option>' for c in ALL)
+    ui["lang_options"] = "".join(f'<option value="{page_name(c)}" data-lang="{TAGS[c]}"{" selected" if c == LANG else ""}>{NAMES[c]}</option>' for c in ALL)
     page = re.sub(r"\{\{(\w+)\}\}", lambda m: ui[m[1]], page)
     open(page_name(LANG), "w", encoding="utf-8").write(page.replace("/*DATA*/", data).replace("/*LOGIC*/", logic))
     print(f"{len(gates)} gates, {len(leads)} of {sum(len(v['leads']) for v in V.values())} leads keyed ({LANG})")
 
 
-NAMES = {c: json.load(open(lang_file(c, "ui.json"), encoding="utf-8"))["lang_name"] for c in ALL}
+UI = {c: json.load(open(lang_file(c, "ui.json"), encoding="utf-8")) for c in ALL}
+NAMES = {c: u["lang_name"] for c, u in UI.items()}
+TAGS = {c: u["lang"] for c, u in UI.items()}  # BCP 47, matched against the browser's languages
 for lang in sys.argv[2:] or ALL:
     assert lang in ALL, f"{lang} has no lang/{lang}/ folder or no text in the database; languages: {ALL}"
     build(lang)

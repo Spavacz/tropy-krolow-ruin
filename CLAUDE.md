@@ -43,9 +43,10 @@ node guide_test.js guide_data.json                 # i guide_data_<kod>.json dla
 - `guide.py` buduje bramki (wybory wymagające statusu, rozdziału albo postaci, które prowadzą do jeszcze
   niezdobytej części), wskazówki („Nowa Wskazówka” i przyciski „Podpowiedź”), streszczenia, odnośniki do
   wpisów i wstawia dane z logiką do `guide_template.html`, co daje samodzielny `guide.html`.
-- Każdy język to osobna strona: polski `guide.html` (Netlify `/`), reszta `guide_<kod>.html`, wszystkie w repo
+- Każdy język to osobna strona: angielski `guide.html` (domyślny, Netlify `/`), reszta `guide_<kod>.html` (polski to `guide_pl.html`), wszystkie w repo
   i na Netlify (decyzja użytkownika). Przełącznik w nagłówku linkuje strony; stan w `localStorage` jest wspólny.
-  Wybrany język jest zapamiętany (`tropy-kr-lang`); samo `/` przekierowuje na niego, `/guide.html` już nie. Napisy strony są w `lang/<kod>/ui.json` (`{{klucz}}` w szablonie, w HTML
+  Wybrany język jest zapamiętany (`tropy-kr-page`; stary klucz `tropy-kr-lang` z `guide.html` = polski jest przenoszony); samo `/`
+  przekierowuje na niego, a bez zapisu na język przeglądarki; `/guide.html` nie przekierowuje. Napisy strony są w `lang/<kod>/ui.json` (`{{klucz}}` w szablonie, w HTML
   i w literałach JS, więc teksty bez `"` i `` ` ``). `statusmap.json` trzyma teksty gry we wszystkich językach kampanii (en, pl, fr, es, de, it, ru, cn).
   Znacznik „New Lead” każdego tłumaczenia jest wykrywany sam (najczęstsze pogrubienie przy angielskim „New Lead”).
   Testy dopasowują po miejscu i warunku, nie po etykiecie, żeby działały w każdym języku.
@@ -63,9 +64,9 @@ node guide_test.js guide_data.json                 # i guide_data_<kod>.json dla
   „-łeś/-łaś”), tylko to, co już się wydarzyło. Brakujące części po zmianie danych wypisze
   `summary_src.py statusmap.json <katalog> 40`. Inny język ma własny plik (`lang/<kod>/summaries.csv`, z
   `summary_src.py … 40 <kod>`), pisany z tekstu gry w tym języku, a nie tłumaczony. Są `pl` i `en` (en pisane z angielskiego tekstu gry).
-  Pliki ręczne leżą w `lang/<kod>/`; brakujący plik guide.py bierze z `lang/pl/`, poza streszczeniami.
+  Pliki ręczne leżą w `lang/<kod>/`; brakujący plik guide.py bierze z `lang/en/` (domyślny), poza streszczeniami.
   Każdy język kampanii ma `lang/<kod>/ui.json` (tłumaczenia napisów strony); build odrzuca w nich " ' ` \ < >.
-- `lang/pl/leads_extra.csv`: wskazówki z ręcznie dobranym warunkiem pokazania (`show`) i zniknięcia (`hide`),
+- `lang/en/leads_extra.csv` (wspólny dla wszystkich języków, `starts` to początek angielskiego tekstu): wskazówki z ręcznie dobranym warunkiem pokazania (`show`) i zniknięcia (`hide`),
   alternatywy oddzielone `;`. Wiersz nadpisuje też automatycznie przypiętą wskazówkę. Używaj, gdy
   zadanie kończy się statusem z innego wątku, np. mapa senatora kończy się na Przyjaciel szlachty cz. 3.
 

@@ -1,10 +1,10 @@
 # Tropy Królów Ruin
 
 A spoiler-free companion page for the Kings of Ruin campaign of Tainted Grail. You tick the statuses from your
-paper campaign sheet, and the page shows what has happened so far and where to go next. The Polish build is online
+paper campaign sheet, and the page shows what has happened so far and where to go next. All languages are online
 at https://tropy-krolow-ruin.netlify.app
 
-The ready pages are `guide.html` (Polish) and `guide_<code>.html` for the other languages, linked by a language
+The ready pages are `guide.html` (English, the default) and `guide_<code>.html` for the other languages, linked by a language
 switch in the header; they also work opened straight from disk. Rebuilding them needs the game's text database, which is not in the repo because it is the game's protected
 content.
 
@@ -36,7 +36,7 @@ python -I -X utf8 guide.py statusmap.json
 node guide_test.js guide_data.json
 ```
 
-`guide.py` builds every language that has a `lang/<code>/` folder: Polish into `guide.html` and
+`guide.py` builds every language that has a `lang/<code>/` folder: English into `guide.html` and
 `guide_data.json`, the others into `guide_<code>.html` and `guide_data_<code>.json` (test those the same way).
 Every page's switch lists all of them.
 
@@ -52,14 +52,14 @@ The language code is the one the app's database uses. The campaign is translated
 `de`, `it`, `ru` and `cn`; `statusmap.py` prints the list it found.
 
 The hand-written files of each language sit in their own folder, `lang/<code>/`. Every language above already has
-one with the page strings (`ui.json`); `pl` and `en` have summaries. A folder is read when its language is chosen. A file the folder lacks is read from `lang/pl/`, the
+one with the page strings (`ui.json`); `pl` and `en` have summaries. A folder is read when its language is chosen. A file the folder lacks is read from `lang/en/`, the
 complete default, except `summaries.csv` (see below). Each part of the page comes from its own place:
 
 - **Game texts** (option names, location and status names, the game's "New Lead" hints) come from the database in
   the chosen language, so there is nothing to write. A status name the translation does not quote recognisably stays
   in English; French, which marks names in bold instead of quotes, keeps many of them in English.
 - **Page strings** (headings, buttons, messages) come from `lang/<code>/ui.json`, a `{key: text}` map. For a new
-  language, copy `lang/en/ui.json` and translate the values; the existing translations welcome corrections. A missing key is taken from `lang/pl/ui.json`, and the build lists
+  language, copy `lang/en/ui.json` and translate the values; the existing translations welcome corrections. A missing key is taken from `lang/en/ui.json`, and the build lists
   such keys. The strings go into HTML and JavaScript literals, so the build refuses `"`, `'`, a backtick, `\`, `<`
   and `>` (use typographic quotes and apostrophes instead). Set
   `lang` to the page's BCP 47 language tag (e.g. `de`), which also drives alphabetical sorting.
@@ -75,7 +75,7 @@ complete default, except `summaries.csv` (see below). Each part of the page come
   Write each summary from the game text in that language rather than translating the Polish file; the translations
   differ in detail. Keep to what has already happened, without hinting at what comes next.
 - **Pinned hints** (`leads_extra.csv`, hints shown from and hidden by hand-picked statuses) work for every language
-  from `lang/pl/`: a row finds the hint by the start of its Polish text and shows it in the chosen language.
+  from `lang/en/`: a row finds the hint by the start of its English text and shows it in the chosen language.
 
 The build has no step for publishing; host the resulting `guide*.html` files together wherever you like.
 

@@ -6,7 +6,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
-<title>Следы Королей Руин</title>
+<title>Следы Королей краха</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
 <style>
@@ -77,7 +77,8 @@ details.older[open] > details.thread { margin-top: 8px; }
 
 <div class="wrap">
   <header>
-    <div class="row top"><h1>Следы Королей Руин</h1><select id="lang" aria-label="Язык"><option value="guide_en.html">English</option><option value="guide.html">Polski</option><option value="guide_fr.html">Français</option><option value="guide_es.html">Español</option><option value="guide_de.html">Deutsch</option><option value="guide_it.html">Italiano</option><option value="guide_ru.html" selected>Русский</option><option value="guide_cn.html">中文</option></select></div>
+    <div class="row top"><h1>Следы Королей краха</h1><select id="lang" aria-label="Язык"><option value="guide.html" data-lang="en">English</option><option value="guide_pl.html" data-lang="pl">Polski</option><option value="guide_fr.html" data-lang="fr">Français</option><option value="guide_es.html" data-lang="es">Español</option><option value="guide_de.html" data-lang="de">Deutsch</option><option value="guide_it.html" data-lang="it">Italiano</option><option value="guide_ru.html" data-lang="ru" selected>Русский</option><option value="guide_cn.html" data-lang="zh-Hans">中文</option></select></div>
+    <p class="note">Неофициальное приложение-помощник для кампании Tainted Grail: Короли краха.</p>
     <div class="row">
       <label class="ch">Глава <select id="chN"></select></label>
       <label class="ch">путь <select id="chL"><option value="">–</option><option>A</option><option>B</option></select></label>
@@ -417,14 +418,24 @@ for (const [id, f] of [["chN", "n"], ["chL", "letter"], ["chP", "part"]])
   };
 document.getElementById("q").oninput = renderSheet;
 // each language is its own page; the saved state is shared, so the switch keeps it
-const langSel = document.getElementById("lang"), LANG_KEY = "tropy-kr-lang";
+const langSel = document.getElementById("lang"), LANG_KEY = "tropy-kr-page";
 langSel.hidden = langSel.options.length < 2;
 try {
-  // / serves the Polish page: send a returning player to the language they picked; a page opened by name is remembered
-  const want = localStorage.getItem(LANG_KEY), here = langSel.value;
-  if (location.pathname.endsWith("/") && want && want !== here && [...langSel.options].some(o => o.value === want))
+  // the old key held "guide.html" back when that page was Polish
+  const old = localStorage.getItem("tropy-kr-lang");
+  if (old !== null) {
+    if (localStorage.getItem(LANG_KEY) === null) localStorage.setItem(LANG_KEY, old === "guide.html" ? "guide_pl.html" : old);
+    localStorage.removeItem("tropy-kr-lang");
+  }
+  // / serves the English page: send a returning player to the language they picked, a first-time one to the
+  // browser's language; a page opened by name is remembered
+  const opts = [...langSel.options], here = langSel.value, saved = localStorage.getItem(LANG_KEY);
+  const browser = (navigator.languages || [navigator.language]).map(l => opts.find(o => o.dataset.lang.split("-")[0] === String(l).split("-")[0]))
+    .find(Boolean);
+  const want = saved !== null ? saved : browser && browser.value;
+  if (location.pathname.endsWith("/") && want && want !== here && opts.some(o => o.value === want))
     location.replace(want + location.hash);
-  else localStorage.setItem(LANG_KEY, here);
+  else if (saved !== null || !location.pathname.endsWith("/")) localStorage.setItem(LANG_KEY, here);
 } catch (e) {}
 langSel.onchange = () => {
   try { localStorage.setItem(LANG_KEY, langSel.value); } catch (e) {}
