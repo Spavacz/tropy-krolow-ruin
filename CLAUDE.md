@@ -15,9 +15,9 @@ ale jest w `.gitignore`. Na telefonie leży w
 krok po kroku, jak ją pobrać (adb, `MSYS_NO_PATHCONV=1` w Git Bash). adb jest w
 `/c/Users/spavm/AppData/Local/Microsoft/WinGet/Packages/Google.PlatformTools_*/platform-tools/` i nie jest
 na PATH. Nagrania nie są tu potrzebne. Treść gry jest chroniona, dlatego
-baza i pliki z pełnym tekstem (`statusmap.json`, `guide_data.json`) są w `.gitignore`, a w repo jest tylko
-gotowy `guide.html` (krótkie cytaty, streszczenia, numery wpisów). Generowanie jest deterministyczne:
-przebudowa z tej samej bazy daje identyczny `guide.html`.
+baza i pliki z pełnym tekstem (`statusmap.json`, `guide_data*.json`) są w `.gitignore`, a w repo są tylko
+gotowe `guide.html` i `guide_<kod>.html` (krótkie cytaty, streszczenia, numery wpisów). Generowanie jest deterministyczne:
+przebudowa z tej samej bazy daje identyczne strony.
 
 Schemat bazy, który się przydaje: `Location` (`_campId=26`, `displayNumber`), `Verse` (wersy lokacji),
 `VerseElements` (typ: 0 narracja, 1 warunek, 2 opcja, -1 warunek automatyczny), `ElemetText` (sic),
@@ -32,8 +32,8 @@ Skrypty używają tylko biblioteki standardowej Pythona. Testy wymagają `node`.
 
 ```
 python -I -X utf8 statusmap.py appData.sqlite statusmap.json
-python -I -X utf8 guide.py statusmap.json guide_data.json guide.html
-node guide_test.js guide_data.json
+python -I -X utf8 guide.py statusmap.json          # wszystkie języki z lang/, albo: ... statusmap.json en de
+node guide_test.js guide_data.json                 # i guide_data_<kod>.json dla pozostałych
 ```
 
 - `statusmap.py` parsuje **angielski** tekst (ma regularne sformułowania: „Gain the “X” part N status”,
@@ -43,15 +43,15 @@ node guide_test.js guide_data.json
 - `guide.py` buduje bramki (wybory wymagające statusu, rozdziału albo postaci, które prowadzą do jeszcze
   niezdobytej części), wskazówki („Nowa Wskazówka” i przyciski „Podpowiedź”), streszczenia, odnośniki do
   wpisów i wstawia dane z logiką do `guide_template.html`, co daje samodzielny `guide.html`.
-- Język strony wybiera się przy budowaniu (`guide.py … guide.html en`, domyślnie `pl`), a nie na stronie:
-  na Netlify idzie tylko polski `guide.html`. Napisy strony są w `lang/<kod>/ui.json` (`{{klucz}}` w szablonie, w HTML
+- Każdy język to osobna strona: polski `guide.html` (Netlify `/`), reszta `guide_<kod>.html`, wszystkie w repo
+  i na Netlify (decyzja użytkownika). Przełącznik w nagłówku linkuje strony; stan w `localStorage` jest wspólny. Napisy strony są w `lang/<kod>/ui.json` (`{{klucz}}` w szablonie, w HTML
   i w literałach JS, więc teksty bez `"` i `` ` ``). `statusmap.json` trzyma teksty gry we wszystkich językach kampanii (en, pl, fr, es, de, it, ru, cn).
   Znacznik „New Lead” każdego tłumaczenia jest wykrywany sam (najczęstsze pogrubienie przy angielskim „New Lead”).
   Testy dopasowują po miejscu i warunku, nie po etykiecie, żeby działały w każdym języku.
 - `guide_logic.js` to logika współdzielona przez stronę i testy: warunki, rozdziały, liczniki, wskazówki,
   kodowanie stanu do linku. `guide_test.js` zawiera testy na prawdziwych danych.
 - Publikacja: Netlify z repo GitHub (`netlify.toml`: bez kroku budowania, `/` serwuje `guide.html`), więc
-  wystarczy commit i push gotowego `guide.html`. `PAGE_URL` w szablonie bierze adres strony z `location`.
+  wystarczy commit i push gotowych `guide*.html`. `PAGE_URL` w szablonie bierze adres strony z `location`.
   Artefakt claude.ai został usunięty; ramka artefaktu dawała domyślne style (viewport, `[hidden]`, margines
   `body`), które strona ma teraz sama.
 

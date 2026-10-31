@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="zh-Hans">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6b5a">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>废墟之王足迹</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+/* One column like a campaign sheet: sticky chapter bar, then the advice list or the status sheet. */
+:root {
+  --bg: #eef0ea; --panel: #f8f9f5; --fg: #1d2420; --muted: #5b665f; --line: #cfd6cc;
+  --accent: #2f6b5a; --on-accent: #f3f6f1; --lead: #6b5420; --lead-bg: #f3ecd9;
+  --display: "Alegreya SC", Georgia, serif; --body: "Alegreya Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121715; --panel: #1a211e; --fg: #e3e8e0; --muted: #98a59c; --line: #2c3631;
+  --accent: #74b8a1; --on-accent: #0e1412; --lead: #e0c27c; --lead-bg: #2a2416; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121715; --panel: #1a211e; --fg: #e3e8e0; --muted: #98a59c; --line: #2c3631;
+  --accent: #74b8a1; --on-accent: #0e1412; --lead: #e0c27c; --lead-bg: #2a2416; color-scheme: dark }
+/* author display rules (.banner is flex) beat the browser's own [hidden] */
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.45 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 640px; margin: 0 auto; padding-block: 12px 48px; display: grid; gap: 16px; }
+header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  padding-block: 10px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+h1 { font: 700 1.5rem/1.1 var(--display); margin: 0; letter-spacing: .02em; text-wrap: balance; }
+.top { justify-content: space-between; }
+h2 { font: 500 1.1rem/1.2 var(--display); margin: 0; color: var(--muted); letter-spacing: .04em; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+label.ch { font-size: .9rem; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+select, input[type=search] { font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 6px; padding: 4px 8px; }
+input[type=search] { width: 100%; box-sizing: border-box; }
+.tabs { display: flex; gap: 4px; }
+.tabs button { flex: 1; font: 500 1rem var(--display); letter-spacing: .03em; padding: 8px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.tabs button[aria-selected=true] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+section { display: grid; gap: 10px; }
+.loc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; }
+.loc h3 { margin: 0; font: 700 1.05rem var(--display); display: flex; gap: 8px; align-items: baseline; }
+.num { font-variant-numeric: tabular-nums; color: var(--accent); }
+.loc ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.why { font-size: .85rem; color: var(--muted); }
+.lead { background: var(--lead-bg); border-left: 3px solid var(--lead); padding: 8px 12px; border-radius: 0 6px 6px 0; }
+.lead small { display: block; color: var(--muted); font-variant-numeric: tabular-nums; }
+.note { font-size: .9rem; color: var(--muted); margin: 0; }
+.banner { background: var(--lead-bg); border-radius: 8px; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.st { display: grid; gap: 4px; padding-block: 8px; border-bottom: 1px solid var(--line); }
+.st b { font-weight: 500; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { min-width: 2.1em; padding: 3px 6px; font: 500 .9rem var(--body); font-variant-numeric: tabular-nums;
+  border: 1px solid var(--line); border-radius: 5px; background: var(--panel); color: var(--fg); cursor: pointer; }
+.chip[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+details.thread { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+details.thread summary { cursor: pointer; list-style: none; display: grid; gap: 2px; }
+details.thread summary::-webkit-details-marker { display: none; }
+details.thread summary b { font: 700 1rem var(--display); }
+details.thread ol { margin: 8px 0 0; padding-left: 1.4em; display: grid; gap: 4px; color: var(--muted); font-size: .95rem; }
+.maplist { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.maplist .chip { text-align: left; display: flex; gap: 6px; align-items: baseline; min-width: 0; }
+.maplist .chip span { overflow-wrap: anywhere; }
+.transfer { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+.transfer textarea { width: 100%; box-sizing: border-box; font: .8rem/1.3 ui-monospace, monospace; color: var(--fg);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px; word-break: break-all; }
+details.older > summary { cursor: pointer; color: var(--muted); padding-block: 6px; }
+details.older { display: grid; gap: 8px; }
+details.older[open] > details.thread { margin-top: 8px; }
+.btn { font: inherit; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="row top"><h1>废墟之王足迹</h1><select id="lang" aria-label="语言"><option value="guide_en.html">English</option><option value="guide.html">Polski</option><option value="guide_fr.html">Français</option><option value="guide_es.html">Español</option><option value="guide_de.html">Deutsch</option><option value="guide_it.html">Italiano</option><option value="guide_ru.html">Русский</option><option value="guide_cn.html" selected>中文</option></select></div>
+    <div class="row">
+      <label class="ch">章节 <select id="chN"></select></label>
+      <label class="ch">路线 <select id="chL"><option value="">–</option><option>A</option><option>B</option></select></label>
+      <label class="ch">部分 <select id="chP"><option value="0">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+    </div>
+    <div class="row" id="party" aria-label="队伍中的角色"></div>
+    <div class="tabs" role="tablist">
+      <button id="tabGo" role="tab" aria-selected="true">去哪里</button>
+      <button id="tabSt" role="tab" aria-selected="false">状态</button>
+      <button id="tabMap" role="tab" aria-selected="false">地图</button>
+    </div>
+  </header>
+
+  <div id="fromLink" class="banner" hidden>
+    <span id="fromLinkMsg"></span>
+    <span class="row"><button class="btn" id="linkYes">载入</button><button class="btn" id="linkNo">保留我的</button></span>
+  </div>
+
+
+  <main id="go">
+    <section id="chapterIntro"></section>
+    <section id="story"></section>
+    <section id="leads"></section>
+    <section id="gates"></section>
+    <section id="heroGates"></section>
+    <section id="chapterGates"></section>
+    <p class="note" id="mapNote">正在显示所有地点。在“地图”标签页中可以勾选桌上的地点。</p>
+  </main>
+
+  <main id="map" hidden>
+    <p class="note">勾选当前在桌上的地点，建议只会显示这些地点。不勾选时显示全部。</p>
+    <div class="maplist" id="maplist"></div>
+  </main>
+
+  <main id="sheet" hidden>
+    <input type="search" id="q" placeholder="搜索状态…" aria-label="搜索状态">
+    <div id="list"></div>
+    <p class="note">没有编号部分的状态（例如时间流逝、欠债）用数字标记：你拥有的数量。</p>
+    <section class="transfer" aria-labelledby="trH">
+      <h2 id="trH">转移到其他设备</h2>
+      <p class="note">代码包含状态、章节、队伍和地图。在这里复制，然后粘贴到另一台设备上。</p>
+      <div class="row"><button class="btn" id="copyLink">复制带状态的链接</button><span class="note" id="linkMsg" role="status"></span></div>
+      <p class="note">链接会用你的状态打开此页面。旧方法（长代码）仍然可用：</p>
+      <div class="row"><button class="btn" id="copyCode">复制代码</button><span class="note" id="copyMsg" role="status"></span></div>
+      <textarea id="code" rows="3" aria-label="状态代码"></textarea>
+      <div class="row"><button class="btn" id="loadCode">载入粘贴的代码</button><span class="note" id="loadMsg" role="status"></span></div>
+    </section>
+  </main>
+
+  <footer class="note" style="border-top: 1px solid var(--line); padding-top: 12px">
+    非官方粉丝网站，与 Awaken Realms 无关。Tainted Grail 是 Awaken Realms 的商标。
+    本页只提供条目编号和自写的摘要；游玩需要游戏本体和 Companion 应用。
+  </footer>
+</div>
+
+<script>
+// Advice from owned status parts; inlined into the page by guide.py and tested by guide_test.js.
+// owned: Set of "Status|part"; a status without numbered parts is counted as "Status|1".."Status|n"
+// ch: {n, letter, part}
+
+function count(owned, s) {
+  let n = 0;
+  for (const k of owned) if (k.startsWith(s + "|")) n++;
+  return n;
+}
+
+function has(owned, s, p) {
+  return p != null ? owned.has(s + "|" + p) : count(owned, s) > 0;
+}
+
+function condOk(owned, ch, [s, p, want, min]) {
+  // "Time Passes" with no chapter means the part for the chapter being played
+  if (s === "Time Passes") s = "Time Passes: Chapter " + ch.n;
+  return (min ? count(owned, s) >= min : has(owned, s, p)) === want;
+}
+
+function chapterOk(ch, [a, b, letter, part, further]) {
+  const sameStep = (!letter || letter === ch.letter);
+  if (further) return ch.n > a || (ch.n === a && sameStep && (!part || ch.part >= part));
+  return ch.n >= a && ch.n <= b && sameStep && (!part || ch.part === part);
+}
+
+// heroes: Set of character names in the party; a gate naming several needs any one of them
+function openGates(data, owned, ch, heroes) {
+  return data.gates.filter(g =>
+    g.conds.every(c => condOk(owned, ch, c)) &&
+    (!g.heroes.length || g.heroes.some(h => heroes.has(h))) &&
+    (!g.chapter.length || g.chapter.some(c => chapterOk(ch, c))) &&
+    g.reach.some(([s, p]) => !owned.has(s + "|" + p)));
+}
+
+// a lead stays relevant while its thread has not moved past the part gained next to it
+function activeLeads(data, owned) {
+  const top = {};
+  for (const k of owned) {
+    const [s, p] = k.split("|");
+    top[s] = Math.max(top[s] || 0, +p || 0);
+  }
+  return data.leads.filter(l => l.hide
+    ? l.keys.some(([s, p]) => has(owned, s, p)) && !l.hide.some(([s, p]) => has(owned, s, p))
+    : l.keys.some(([s, p]) => owned.has(s + "|" + p) && top[s] === p));
+}
+
+
+// Compact state for a link: one bit per sheet box, packed into base36 with a layout version.
+// Only letters, digits and "-" survive in an artifact link's #hash, so the code uses nothing else.
+const COUNT_BITS = 3;  // tallies of statuses without numbered parts go up to 7
+const HEROES_ALL = ["Elgan", "Gerdwyn", "Iunis", "Osbert"];
+
+function layout(data) {
+  const statuses = Object.keys(data.max_part).filter(s => s !== "Time Passes").sort();
+  const locs = Object.keys(data.loc_names).map(Number).sort((a, b) => a - b);
+  let h = 2166136261;  // FNV-1a over the layout: a link from another data build is refused, not misread
+  for (const c of JSON.stringify([statuses.map(s => [s, data.max_part[s]]), locs])) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+  return { statuses, locs, ver: h.toString(36).slice(0, 4) };
+}
+
+function encodeState(data, state) {
+  const { statuses, locs, ver } = layout(data);
+  const owned = new Set(state.owned), bits = [];
+  const put = (v, n) => { for (let i = n - 1; i >= 0; i--) bits.push((v >> i) & 1); };
+  for (const s of statuses) {
+    if (data.max_part[s]) for (let p = 1; p <= data.max_part[s]; p++) bits.push(owned.has(s + "|" + p) ? 1 : 0);
+    else put(Math.min(count(owned, s), 2 ** COUNT_BITS - 1), COUNT_BITS);
+  }
+  put(state.ch.n, 4); put(["", "A", "B"].indexOf(state.ch.letter), 2); put(state.ch.part, 3);
+  for (const h of HEROES_ALL) bits.push(state.heroes.includes(h) ? 1 : 0);
+  for (const l of locs) bits.push(state.onMap.includes(l) ? 1 : 0);
+  return "t" + ver + "-" + BigInt("0b1" + bits.join("")).toString(36);  // leading 1 keeps leading zeros
+}
+
+function decodeState(data, code) {
+  const m = /^t([0-9a-z]{1,4})-([0-9a-z]+)$/.exec(code);
+  if (!m) throw new Error("format");
+  const { statuses, locs, ver } = layout(data);
+  if (m[1] !== ver) throw new Error("version");
+  let n = 0n;
+  for (const c of m[2]) n = n * 36n + BigInt(parseInt(c, 36));
+  const bits = n.toString(2).slice(1);
+  let i = 0;
+  const take = k => { let v = 0; for (let j = 0; j < k; j++) v = v * 2 + +(bits[i++] === "1"); return v; };
+  const owned = [];
+  for (const s of statuses) {
+    if (data.max_part[s]) { for (let p = 1; p <= data.max_part[s]; p++) if (take(1)) owned.push(s + "|" + p); }
+    else for (let p = 1, c = take(COUNT_BITS); p <= c; p++) owned.push(s + "|" + p);
+  }
+  const ch = { n: take(4), letter: ["", "A", "B", ""][take(2)], part: take(3) };
+  const heroes = HEROES_ALL.filter(() => take(1));
+  const onMap = locs.filter(() => take(1));
+  if (i !== bits.length) throw new Error("length");
+  return { owned, ch, heroes, onMap, sample: false };
+}
+
+if (typeof module !== "undefined") module.exports = { encodeState, decodeState, count, has, condOk, chapterOk, openGates, activeLeads };
+
+const DATA = {"names":{"Hints":"提示","Curios":"小古董","Sharp Truth":"尖锐的真相","Songs of Avalon":"阿瓦隆之歌","Negotiator":"谈判家","Faint Notion":"模糊的画面","Secret Messages":"秘密信息","Strange Lessons":"神秘体验","Friend of Nobility":"贵族朋友","Rumors & Hearsay":"流言蜚语","Insolent":"傲慢","Sticky Fingers":"小偷小摸","Wyrdglass Reveals":"冥光镜下","Wyrd Harvest":"冥尘中收获","Obstacles":"障碍","Topography":"地势","Stocking Up":"囤积","Performances":"演出","Foraging":"采集","Risk Taker":"冒险家","Champion of the Smallfolk":"小民捍卫者","Rummaging":"翻箱倒柜","Plots and Schemes":"阴谋诡计","Campfire stories":"营火边的故事","Small Favor":"小恩小惠","Time Passes: Chapter 2":"时间流逝（章节2）","Family Secrets":"家族秘密","Notable Deeds":"英勇事迹","Royal Funeral":"王室葬礼","Keys & Passwords":"钥匙与密码","Informer":"告密者","Time Passes: Chapter 4":"时间流逝（章节4）","Rebuilding Lothian":"重建洛锡安","Companions":"随从","Personal Matters":"私事","Time Passes: Chapter 3":"时间流逝（章节3）","Mapping the Bog":"测绘沼泽","Builders of Sorlois":"索雷斯的建造者","Past Travelers":"往日旅人","Venedian Path":"维尼迪亚之路","Embers":"余烬","Chance Meetings":"偶遇","Time Passes: Chapter 6":"时间流逝（章节6）","Cold Heart":"冷酷的心","Melting":"熔化","Time Passes":"时间流逝（当前章节）","Twist of Fate":"命运曲折","Terrors and Perils":"恐惧与祸害","End of the Road":"路的尽头","Blackwood Alliance":"黑木联盟","Old Records":"旧资料","Kendrick":"肯德里克","Tracker":"追踪者","Avalon’s Future":"阿瓦隆的未来","Amberqueen’s Secrets":"琥珀女王的秘密","Limited Stock":"库存有限","Time Passes: Chapter 8":"时间流逝（章节8）","Bureaucracy":"官僚","Drought":"枯竭","Suppression":"压迫","Bishop’s Sins":"主教之罪","Freedom":"自由","Revelry":"寻欢作乐","Isolut":"伊索鲁特","Forbidden Land":"禁地","Repayment":"偿还","Debt":"欠债","Foreign Goods":"外国货","Realist":"务实","Failures of the Unknighted":"无冕者的落败","Time Passes: Chapter 6A":"时间流逝（章节6A）","Facing the Ruin":"直面废墟","Streets of Sorlois":"索雷斯的街道","Time Passes: Chapter 5":"时间流逝（章节5）","Lessons of Cunning":"计谋之训导","Lessons of Inspiration":"激励之训导","Past Lessons":"往昔为鉴","Advantage: Water":"优势在海洋","Advantage: Wyrdness":"优势在冥尘","Lucky Tail":"幸运尾巴","Alternate Paths":"改变道路","Epilogues":"尾声"},"loc_names":{"101":"避难之地","102":"扭曲卫兵","103":"石林合唱团","203":"崩塌的合唱团","104":"高昂森林","105":"马车堡","205":"废弃的营地","106":"倒影镇","107":"破碎战场","108":"铁笼岗","109":"悬空山路","110":"御道","111":"石牙墩","112":"林地眺望点","113":"迷路林","114":"迷路林","115":"迷路林","116":"外堡遗址","216":"洛锡安营地","117":"洛锡安城堡","217":"重建的城堡","118":"城堡以北","218":"重建的伐木场","119":"城堡以南","219":"重建的水车","120":"通往无处之门","121":"粼波平原","122":"淹没的堤道","123":"拱桥下","124":"未完之城","125":"索斯兰","126":"光复之地","127":"烛林谷","128":"黑环","129":"漫游岩","130":"攀援树林","131":"呼啸激流","132":"杰热米耶","232":"花环节","332":"大火堆","133":"镰刀湾","134":"祥和的村庄","135":"琥珀海岸","136":"荒凉峰","137":"佩伦格勒","138":"阿科纳","139":"兹梅之路","140":"白桦坡","141":"中心森林","241":"安静的中心森林","150":"奴隶之路","151":"北岸码头","152":"乡村别墅","252":"踏平的别墅","153":"森郁山","154":"大庄园","254":"燃烧的废墟","155":"西马里亚纳","255":"战后的西城区","156":"东马里亚纳","157":"佛伯格农庄","158":"孤寂尖塔","258":"倒塌的尖塔","159":"冥尘锻造所","259":"沸腾之门","160":"登岸城","161":"乌啼乡","261":"增生物","162":"水山","165":"巨石之路","166":"绯红根源","167":"硬化森林","168":"粉碎柱廊","169":"赤灰平原"},"max_part":{"Hints":2,"Sharp Truth":5,"Songs of Avalon":3,"Negotiator":9,"Curios":10,"Faint Notion":9,"Secret Messages":3,"Strange Lessons":9,"Risk Taker":7,"Friend of Nobility":5,"Rumors & Hearsay":7,"Insolent":5,"Sticky Fingers":9,"Small Favor":10,"Time Passes: Chapter 2":0,"Wyrdglass Reveals":11,"Topography":9,"Cold Heart":10,"Isolut":7,"Realist":4,"Family Secrets":10,"Venedian Path":10,"Personal Matters":15,"Notable Deeds":8,"Stocking Up":9,"Twist of Fate":4,"Champion of the Smallfolk":7,"Time Passes":0,"Failures of the Unknighted":4,"Royal Funeral":5,"Bishop’s Sins":5,"Informer":6,"End of the Road":8,"Wyrd Harvest":8,"Drought":8,"Avalon’s Future":11,"Time Passes: Chapter 3":0,"Bureaucracy":5,"Plots and Schemes":9,"Revelry":2,"Performances":4,"Companions":4,"Forbidden Land":8,"Chance Meetings":9,"Suppression":6,"Freedom":8,"Terrors and Perils":10,"Rummaging":9,"Tracker":4,"Rebuilding Lothian":8,"Obstacles":4,"Foraging":11,"Facing the Ruin":4,"Time Passes: Chapter 4":0,"Old Records":5,"Streets of Sorlois":0,"Mapping the Bog":0,"Time Passes: Chapter 5":0,"Lessons of Cunning":0,"Builders of Sorlois":4,"Campfire stories":0,"Lessons of Inspiration":0,"Melting":0,"Blackwood Alliance":4,"Past Travelers":4,"Past Lessons":4,"Advantage: Water":0,"Advantage: Wyrdness":0,"Amberqueen’s Secrets":4,"Kendrick":7,"Lucky Tail":5,"Keys & Passwords":2,"Embers":6,"Alternate Paths":12,"Debt":0,"Epilogues":3,"Time Passes: Chapter 6":0,"Limited Stock":0,"Time Passes: Chapter 8":0,"Repayment":0,"Foreign Goods":0,"Left Behind":2},"gates":[{"at":"101/3","locs":[101],"label":"","conds":[["Sharp Truth",1,true]],"chapter":[],"heroes":[],"reach":[["Curios",10]]},{"at":"101/3","locs":[101],"label":"","conds":[["Songs of Avalon",1,true]],"chapter":[],"heroes":[],"reach":[["Curios",4],["Curios",10]]},{"at":"101/10","locs":[101],"label":"","conds":[["Curios",10,false]],"chapter":[],"heroes":["Elgan"],"reach":[["Curios",10],["Sharp Truth",1]]},{"at":"102/0","locs":[102],"label":"1 研究雕像的魔法光环","conds":[["Faint Notion",1,true]],"chapter":[],"heroes":[],"reach":[["Strange Lessons",1]]},{"at":"102/7","locs":[102],"label":"","conds":[["Friend of Nobility",1,true]],"chapter":[],"heroes":[],"reach":[["Insolent",1]]},{"at":"999/6","locs":[112,216],"label":"","conds":[["Time Passes: Chapter 2",null,true]],"chapter":[],"heroes":[],"reach":[["Small Favor",8]]},{"at":"999/7","locs":[106],"label":"查看制烛用品 -","conds":[],"chapter":[],"heroes":["Elgan"],"reach":[["Faint Notion",2],["Sticky Fingers",1],["Stocking Up",1]]},{"at":"999/7","locs":[106],"label":"查看制箭匠的货物 -","conds":[],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Faint Notion",2],["Sticky Fingers",1],["Stocking Up",2]]},{"at":"999/7","locs":[106],"label":"查看烟花和火药 -","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Faint Notion",2],["Sticky Fingers",1],["Stocking Up",3]]},{"at":"999/33","locs":[106],"label":"","conds":[["Time Passes",null,true]],"chapter":[],"heroes":[],"reach":[["Faint Notion",2],["Sticky Fingers",1]]},{"at":"999/74","locs":[108],"label":"","conds":[["Songs of Avalon",1,true]],"chapter":[],"heroes":[],"reach":[["Wyrd Harvest",4]]},{"at":"999/90","locs":[125,241],"label":"建议他们派使者去找王室，收回拖欠的工资","conds":[["Royal Funeral",1,true]],"chapter":[],"heroes":[],"reach":[["Notable Deeds",6],["Personal Matters",5]]},{"at":"999/115","locs":[254],"label":"","conds":[["Drought",1,true]],"chapter":[],"heroes":[],"reach":[["Drought",7]]},{"at":"999/116","locs":[217],"label":"","conds":[["Royal Funeral",2,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",5]]},{"at":"999/121","locs":[254],"label":"","conds":[["Drought",1,true]],"chapter":[],"heroes":[],"reach":[["Drought",7]]},{"at":"999/125","locs":[123],"label":"","conds":[["Strange Lessons",5,true],["Faint Notion",4,false]],"chapter":[],"heroes":[],"reach":[["Faint Notion",4]]},{"at":"999/157","locs":[123],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Personal Matters",6]]},{"at":"999/181","locs":[123],"label":"","conds":[["Time Passes",null,true]],"chapter":[],"heroes":[],"reach":[["Chance Meetings",1],["Failures of the Unknighted",1],["Faint Notion",4],["Twist of Fate",1]]},{"at":"999/203","locs":[169],"label":"","conds":[["Forbidden Land",1,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",8]]},{"at":"999/204","locs":[106],"label":"","conds":[["Stocking Up",2,true]],"chapter":[],"heroes":[],"reach":[["Cold Heart",1]]},{"at":"999/205","locs":[169],"label":"","conds":[["Forbidden Land",1,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",8]]},{"at":"999/207","locs":[153],"label":"","conds":[["Freedom",null,true,4],["Suppression",null,false]],"chapter":[],"heroes":[],"reach":[["Chance Meetings",7]]},{"at":"999/239","locs":[217,241],"label":"坚持你的选择，奥芙瑞德应当加冕为女王！","conds":[["Royal Funeral",5,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",2],["Family Secrets",9]]},{"at":"999/246","locs":[130],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Champion of the Smallfolk",4],["Venedian Path",3]]},{"at":"999/266","locs":[130],"label":"","conds":[],"chapter":[[9,9,"B",3,false]],"heroes":[],"reach":[["Champion of the Smallfolk",4],["Venedian Path",3]]},{"at":"999/273","locs":[156],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["End of the Road",7],["End of the Road",8],["Plots and Schemes",6]]},{"at":"999/276","locs":[129],"label":"收获蜂蜡","conds":[],"chapter":[],"heroes":["Elgan"],"reach":[["Negotiator",7]]},{"at":"999/280","locs":[169],"label":"","conds":[["Forbidden Land",1,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",8]]},{"at":"999/280","locs":[169],"label":"","conds":[["Drought",3,true],["Drought",4,false]],"chapter":[],"heroes":[],"reach":[["Drought",4]]},{"at":"999/301","locs":[168],"label":"","conds":[["Forbidden Land",1,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",6]]},{"at":"999/302","locs":[168],"label":"","conds":[["Forbidden Land",1,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",6]]},{"at":"999/309","locs":[168],"label":"","conds":[["Forbidden Land",1,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",6]]},{"at":"999/324","locs":[117],"label":"","conds":[["Small Favor",8,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2]]},{"at":"999/324","locs":[117],"label":"","conds":[["Small Favor",6,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2]]},{"at":"999/340","locs":[216],"label":"","conds":[["Royal Funeral",1,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",1],["Royal Funeral",4],["Royal Funeral",5]]},{"at":"999/340","locs":[216],"label":"","conds":[["Royal Funeral",2,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",1],["Royal Funeral",4],["Royal Funeral",5]]},{"at":"999/340","locs":[216],"label":"","conds":[["Royal Funeral",3,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",1],["Royal Funeral",4],["Royal Funeral",5]]},{"at":"999/345","locs":[140],"label":"坚持你的选择，希柏瑞德的女儿应当统治洛锡安！","conds":[["Royal Funeral",5,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",3],["Family Secrets",10]]},{"at":"999/331","locs":[141,241],"label":"","conds":[],"chapter":[[6,6,"",0,false]],"heroes":[],"reach":[["Secret Messages",3]]},{"at":"999/335","locs":[216],"label":"","conds":[["Royal Funeral",1,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",1],["Royal Funeral",4],["Royal Funeral",5]]},{"at":"999/335","locs":[216],"label":"","conds":[["Royal Funeral",2,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",1],["Royal Funeral",4],["Royal Funeral",5]]},{"at":"999/335","locs":[216],"label":"","conds":[["Royal Funeral",3,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",1],["Royal Funeral",4],["Royal Funeral",5]]},{"at":"999/369","locs":[217,241],"label":"坚持你的选择，双生子应当统治洛锡安！","conds":[["Royal Funeral",5,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7]]},{"at":"999/383","locs":[216],"label":"","conds":[["Family Secrets",2,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",1],["Royal Funeral",4],["Royal Funeral",5]]},{"at":"999/385","locs":[106],"label":"1 进入倒影","conds":[["Strange Lessons",2,true]],"chapter":[],"heroes":[],"reach":[["Faint Notion",2],["Sticky Fingers",1],["Strange Lessons",2]]},{"at":"999/387","locs":[216],"label":"","conds":[["Family Secrets",2,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",1],["Royal Funeral",4],["Royal Funeral",5]]},{"at":"999/389","locs":[216],"label":"","conds":[["Family Secrets",3,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",1],["Royal Funeral",4],["Royal Funeral",5]]},{"at":"999/397","locs":[103,203],"label":"搅动出一场足以威胁马车堡的风暴","conds":[["Obstacles",2,true]],"chapter":[],"heroes":[],"reach":[["Cold Heart",4],["Stocking Up",4]]},{"at":"999/433","locs":[241],"label":"把王后被害现场的书钉给他看","conds":[["Family Secrets",2,true]],"chapter":[],"heroes":[],"reach":[["Failures of the Unknighted",2],["Failures of the Unknighted",3],["Faint Notion",6],["Family Secrets",5],["Forbidden Land",6],["Negotiator",5],["Notable Deeds",5],["Old Records",2]]},{"at":"999/433","locs":[241],"label":"询问他，你帮奥芙瑞德找的是什么书","conds":[["Small Favor",8,true]],"chapter":[],"heroes":[],"reach":[["Failures of the Unknighted",2],["Failures of the Unknighted",3],["Faint Notion",6],["Family Secrets",5],["Forbidden Land",6],["Negotiator",5],["Notable Deeds",5],["Old Records",2]]},{"at":"999/435","locs":[216],"label":"","conds":[["Royal Funeral",1,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Avalon’s Future",3]]},{"at":"999/438","locs":[217],"label":"","conds":[["Family Secrets",7,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Avalon’s Future",3]]},{"at":"999/438","locs":[217],"label":"","conds":[["Family Secrets",8,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Avalon’s Future",3]]},{"at":"999/438","locs":[217],"label":"","conds":[["Family Secrets",9,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",2],["Avalon’s Future",3]]},{"at":"999/438","locs":[217],"label":"","conds":[["Family Secrets",10,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",3]]},{"at":"999/438","locs":[217],"label":"","conds":[["Royal Funeral",1,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Avalon’s Future",3]]},{"at":"999/446","locs":[150],"label":"","conds":[],"chapter":[[6,6,"",1,false]],"heroes":[],"reach":[["Bureaucracy",1],["Rumors & Hearsay",5],["Suppression",1]]},{"at":"999/456","locs":[158],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Personal Matters",10],["Topography",8]]},{"at":"999/458","locs":[132,232],"label":"把包裹交给她","conds":[["Venedian Path",1,true]],"chapter":[],"heroes":[],"reach":[["Venedian Path",2],["Venedian Path",5]]},{"at":"999/458","locs":[132,232],"label":"拒绝交出包裹","conds":[["Venedian Path",1,true]],"chapter":[],"heroes":[],"reach":[["Venedian Path",2],["Venedian Path",5]]},{"at":"999/474","locs":[132,232],"label":"","conds":[["Personal Matters",5,true]],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Venedian Path",5]]},{"at":"999/504","locs":[216],"label":"把你的发现告诉郡长","conds":[["Family Secrets",null,true,2]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2]]},{"at":"999/509","locs":[135],"label":"","conds":[["Strange Lessons",8,true]],"chapter":[],"heroes":[],"reach":[["Strange Lessons",7],["Terrors and Perils",9]]},{"at":"999/512","locs":[124,241],"label":"","conds":[["Old Records",1,true]],"chapter":[],"heroes":[],"reach":[["Old Records",1]]},{"at":"999/514","locs":[216],"label":"","conds":[["Royal Funeral",2,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2]]},{"at":"999/514","locs":[216],"label":"","conds":[["Royal Funeral",3,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2]]},{"at":"999/518","locs":[255],"label":"","conds":[["Drought",2,false]],"chapter":[[9,9,"A",0,false]],"heroes":[],"reach":[["Drought",2]]},{"at":"999/521","locs":[117],"label":"","conds":[["Small Favor",8,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2]]},{"at":"999/521","locs":[117],"label":"","conds":[["Small Favor",6,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2]]},{"at":"999/527","locs":[155],"label":"","conds":[["Freedom",2,true],["Cold Heart",5,false]],"chapter":[],"heroes":[],"reach":[["Secret Messages",3]]},{"at":"999/539","locs":[124,241],"label":"","conds":[],"chapter":[[4,4,"",0,false]],"heroes":[],"reach":[["Companions",2]]},{"at":"999/573","locs":[117],"label":"","conds":[["Small Favor",9,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2]]},{"at":"999/573","locs":[117],"label":"","conds":[["Small Favor",6,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2]]},{"at":"999/581","locs":[124,241],"label":"","conds":[["Builders of Sorlois",4,true]],"chapter":[],"heroes":[],"reach":[["Failures of the Unknighted",2],["Failures of the Unknighted",3],["Faint Notion",6],["Forbidden Land",6],["Negotiator",5],["Notable Deeds",5],["Old Records",2]]},{"at":"999/581","locs":[124,241],"label":"","conds":[["Builders of Sorlois",2,true]],"chapter":[],"heroes":[],"reach":[["Failures of the Unknighted",2],["Failures of the Unknighted",3],["Faint Notion",6],["Forbidden Land",6],["Negotiator",5],["Notable Deeds",5],["Old Records",2]]},{"at":"1001/628","locs":[123],"label":"2 在拱桥镇演出","conds":[["Performances",2,false]],"chapter":[],"heroes":["Osbert"],"reach":[["Performances",2]]},{"at":"1001/628","locs":[123],"label":"1 寻找关于你家人的信息","conds":[],"chapter":[],"heroes":["Elgan"],"reach":[["Personal Matters",6]]},{"at":"1001/653","locs":[134],"label":"喊她玛拉德娜，并表明自己不想伤害她","conds":[["Rumors & Hearsay",6,true]],"chapter":[],"heroes":[],"reach":[["Sharp Truth",2]]},{"at":"1001/662","locs":[138],"label":"1 拜访阿斯科德大公的家人","conds":[["Chance Meetings",2,true],["Blackwood Alliance",1,false]],"chapter":[],"heroes":[],"reach":[["Amberqueen’s Secrets",3],["Blackwood Alliance",1],["Friend of Nobility",3]]},{"at":"1001/677","locs":[332],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Embers",4]]},{"at":"1001/679","locs":[332],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Embers",4]]},{"at":"1001/681","locs":[332],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Embers",4],["Notable Deeds",7]]},{"at":"1001/684","locs":[332],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Embers",4],["Notable Deeds",7]]},{"at":"1001/687","locs":[332],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Embers",4],["Notable Deeds",7]]},{"at":"1001/696","locs":[134],"label":"","conds":[["Informer",6,true]],"chapter":[],"heroes":[],"reach":[["Strange Lessons",9]]},{"at":"1001/717","locs":[128],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Avalon’s Future",5],["End of the Road",1],["End of the Road",2],["Personal Matters",11],["Personal Matters",12],["Personal Matters",13],["Personal Matters",14]]},{"at":"1001/727","locs":[138],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Cold Heart",9]]},{"at":"1001/727","locs":[138],"label":"","conds":[["Blackwood Alliance",null,true,3]],"chapter":[],"heroes":[],"reach":[["Blackwood Alliance",1],["Cold Heart",9]]},{"at":"1001/728","locs":[128],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Avalon’s Future",5],["End of the Road",1],["End of the Road",2],["Personal Matters",11],["Personal Matters",12],["Personal Matters",13],["Personal Matters",14]]},{"at":"1001/745","locs":[128],"label":"提出一个无需使用冥尘的替代方案","conds":[["Blackwood Alliance",null,true,2],["Avalon’s Future",4,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",5],["Venedian Path",10]]},{"at":"1001/747","locs":[128],"label":"提出一个无需使用冥尘的替代方案","conds":[["Blackwood Alliance",null,true,2],["Avalon’s Future",4,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",5],["Venedian Path",10]]},{"at":"1001/783","locs":[134],"label":"","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["End of the Road",3],["End of the Road",4]]},{"at":"1001/783","locs":[134],"label":"","conds":[["Champion of the Smallfolk",5,true]],"chapter":[],"heroes":[],"reach":[["End of the Road",3],["End of the Road",4]]},{"at":"1001/783","locs":[134],"label":"","conds":[["Cold Heart",7,true]],"chapter":[],"heroes":[],"reach":[["End of the Road",3],["End of the Road",4]]},{"at":"1001/770","locs":[134],"label":"","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Cold Heart",7],["End of the Road",3],["End of the Road",4]]},{"at":"1001/839","locs":[111],"label":"","conds":[["Kendrick",null,true,4]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",8]]},{"at":"1001/888","locs":[128],"label":"","conds":[["End of the Road",1,false]],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Avalon’s Future",5],["End of the Road",1],["End of the Road",2],["Personal Matters",11],["Personal Matters",12],["Personal Matters",13],["Personal Matters",14]]},{"at":"1001/911","locs":[258],"label":"","conds":[["Isolut",1,true]],"chapter":[],"heroes":[],"reach":[["Isolut",6],["Isolut",7]]},{"at":"1001/914","locs":[167],"label":"","conds":[["Forbidden Land",1,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",7]]},{"at":"1001/915","locs":[167],"label":"","conds":[["Forbidden Land",1,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",7]]},{"at":"1001/934","locs":[167],"label":"","conds":[["Forbidden Land",1,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",7]]},{"at":"1001/971","locs":[241],"label":"跟他们说，蛋已经孵化了，但孵出的生物已经成了你的盟友","conds":[["Venedian Path",8,true]],"chapter":[],"heroes":[],"reach":[["Topography",9]]},{"at":"1001/974","locs":[128],"label":"","conds":[["Plots and Schemes",8,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",5],["Venedian Path",10]]},{"at":"1001/992","locs":[241],"label":"提议说，利用你和琥珀幼崽的关系，策反维妮达手下所有的琥珀兽","conds":[["Venedian Path",8,true]],"chapter":[],"heroes":[],"reach":[["Topography",9]]},{"at":"1001/995","locs":[332],"label":"","conds":[["End of the Road",1,false]],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Notable Deeds",7]]},{"at":"1001/1000","locs":[123,153],"label":"重新分配埃尔甘的经验","conds":[],"chapter":[],"heroes":["Elgan"],"reach":[["Alternate Paths",1]]},{"at":"1001/1000","locs":[123,153],"label":"重新分配戈德温的经验","conds":[],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Alternate Paths",4]]},{"at":"1001/1000","locs":[123,153],"label":"重新分配尤妮丝的经验","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Alternate Paths",7]]},{"at":"1001/1000","locs":[123,153],"label":"重新分配欧斯博特的经验","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Alternate Paths",10]]},{"at":"1001/1011","locs":[123,153],"label":"","conds":[["Alternate Paths",2,true]],"chapter":[],"heroes":[],"reach":[["Alternate Paths",3]]},{"at":"1001/1011","locs":[123,153],"label":"","conds":[["Alternate Paths",1,true]],"chapter":[],"heroes":[],"reach":[["Alternate Paths",2]]},{"at":"1001/1012","locs":[123,153],"label":"","conds":[["Alternate Paths",5,true]],"chapter":[],"heroes":[],"reach":[["Alternate Paths",6]]},{"at":"1001/1012","locs":[123,153],"label":"","conds":[["Alternate Paths",4,true]],"chapter":[],"heroes":[],"reach":[["Alternate Paths",5]]},{"at":"1001/1013","locs":[123,153],"label":"","conds":[["Alternate Paths",8,true]],"chapter":[],"heroes":[],"reach":[["Alternate Paths",9]]},{"at":"1001/1013","locs":[123,153],"label":"","conds":[["Alternate Paths",7,true]],"chapter":[],"heroes":[],"reach":[["Alternate Paths",8]]},{"at":"1001/1014","locs":[123,153],"label":"","conds":[["Alternate Paths",11,true]],"chapter":[],"heroes":[],"reach":[["Alternate Paths",12]]},{"at":"1001/1014","locs":[123,153],"label":"","conds":[["Alternate Paths",10,true]],"chapter":[],"heroes":[],"reach":[["Alternate Paths",11]]},{"at":"1001/1015","locs":[241],"label":"","conds":[["Venedian Path",3,true]],"chapter":[],"heroes":[],"reach":[["Amberqueen’s Secrets",1],["Embers",5],["Faint Notion",9]]},{"at":"1001/1027","locs":[156],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Drought",3]]},{"at":"1001/1044","locs":[167],"label":"引起她的注意","conds":[["Forbidden Land",4,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",7]]},{"at":"1001/1055","locs":[259],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Drought",6]]},{"at":"1001/1087","locs":[168],"label":"引起他的注意","conds":[["Forbidden Land",3,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",6]]},{"at":"1001/1066","locs":[259],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Drought",6]]},{"at":"1001/1102","locs":[111],"label":"","conds":[["Suppression",null,true,3]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",8]]},{"at":"1001/1102","locs":[111],"label":"","conds":[["Risk Taker",null,true,4]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",8]]},{"at":"1001/1106","locs":[169],"label":"吸引他的注意","conds":[["Forbidden Land",5,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",8]]},{"at":"1001/1127","locs":[111],"label":"","conds":[["Wyrdglass Reveals",null,true,8]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",8]]},{"at":"1001/1127","locs":[111],"label":"","conds":[["Insolent",null,true,4]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",8]]},{"at":"1001/1127","locs":[111],"label":"","conds":[["Negotiator",null,true,3]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",8]]},{"at":"1001/1149","locs":[111],"label":"","conds":[["Cold Heart",null,true,3]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",8]]},{"at":"1001/1149","locs":[111],"label":"","conds":[["Songs of Avalon",null,true,2]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",8]]},{"at":"1001/1152","locs":[166],"label":"","conds":[["Avalon’s Future",9,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",10]]},{"at":"1001/1163","locs":[166],"label":"","conds":[["Avalon’s Future",9,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",10]]},{"at":"1001/1177","locs":[166],"label":"","conds":[["Epilogues",1,false]],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Epilogues",1]]},{"at":"1001/1177","locs":[166],"label":"","conds":[["Epilogues",2,false]],"chapter":[],"heroes":["Osbert"],"reach":[["Epilogues",2]]},{"at":"1001/1177","locs":[166],"label":"","conds":[["Epilogues",3,false]],"chapter":[],"heroes":["Elgan"],"reach":[["Epilogues",3]]},{"at":"1001/1178","locs":[166],"label":"","conds":[],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Epilogues",1]]},{"at":"1001/1178","locs":[166],"label":"","conds":[["End of the Road",1,true]],"chapter":[],"heroes":[],"reach":[["Epilogues",1]]},{"at":"1001/1180","locs":[166],"label":"","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Epilogues",2]]},{"at":"1001/1180","locs":[166],"label":"","conds":[["End of the Road",4,true]],"chapter":[],"heroes":[],"reach":[["Epilogues",2]]},{"at":"1001/1182","locs":[166],"label":"","conds":[],"chapter":[],"heroes":["Elgan"],"reach":[["Epilogues",3]]},{"at":"1001/1182","locs":[166],"label":"","conds":[["End of the Road",6,true]],"chapter":[],"heroes":[],"reach":[["Epilogues",3]]},{"at":"103/7","locs":[103],"label":"1 跃入大海","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Stocking Up",4]]},{"at":"104/0","locs":[104],"label":"1 检查发光而裸露的树根","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Wyrd Harvest",1]]},{"at":"104/4","locs":[104],"label":"1 检查发光而裸露的树根","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Wyrd Harvest",1]]},{"at":"105/11","locs":[105],"label":"1 说服他放你进去给里面的人表演","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Performances",1]]},{"at":"105/6","locs":[105],"label":"寻找营地的弱点","conds":[],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Topography",1]]},{"at":"105/6","locs":[105],"label":"寻找营地的弱点","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Obstacles",2]]},{"at":"105/9","locs":[105],"label":"2 点燃一支能产生恐惧的蜡烛","conds":[["Stocking Up",1,true]],"chapter":[],"heroes":["Elgan"],"reach":[["Cold Heart",2]]},{"at":"105/9","locs":[105],"label":"2 表演戏法，在马车堡制造恐慌","conds":[["Stocking Up",3,true]],"chapter":[],"heroes":["Osbert"],"reach":[["Cold Heart",3]]},{"at":"106/18","locs":[106],"label":"告诉他，你已经在一个遥远的时空里见过他了","conds":[["Faint Notion",2,true]],"chapter":[],"heroes":[],"reach":[["Notable Deeds",1]]},{"at":"106/2","locs":[106],"label":"","conds":[["Notable Deeds",1,true]],"chapter":[],"heroes":[],"reach":[["Curios",3]]},{"at":"108/0","locs":[108],"label":"","conds":[],"chapter":[[5,5,"",3,false]],"heroes":[],"reach":[["Wyrd Harvest",4]]},{"at":"108/1","locs":[108],"label":"","conds":[["Foraging",3,true]],"chapter":[],"heroes":[],"reach":[["Champion of the Smallfolk",1],["Risk Taker",1],["Songs of Avalon",1]]},{"at":"108/3","locs":[108],"label":"","conds":[["Risk Taker",1,true]],"chapter":[],"heroes":[],"reach":[["Champion of the Smallfolk",1],["Songs of Avalon",1]]},{"at":"110/0","locs":[110],"label":"","conds":[],"chapter":[[5,10,"",0,false]],"heroes":[],"reach":[["Rummaging",8]]},{"at":"110/4","locs":[110],"label":"","conds":[["Sticky Fingers",null,true,4]],"chapter":[],"heroes":[],"reach":[["Sticky Fingers",8]]},{"at":"110/4","locs":[110],"label":"","conds":[["Champion of the Smallfolk",null,true,3]],"chapter":[],"heroes":[],"reach":[["Champion of the Smallfolk",6]]},{"at":"110/4","locs":[110],"label":"","conds":[["Friend of Nobility",null,true,3]],"chapter":[],"heroes":[],"reach":[["Friend of Nobility",5],["Plots and Schemes",7]]},{"at":"110/22","locs":[110],"label":"","conds":[["Plots and Schemes",7,true]],"chapter":[],"heroes":[],"reach":[["Friend of Nobility",5]]},{"at":"110/38","locs":[110],"label":"","conds":[["Sticky Fingers",null,true,4]],"chapter":[],"heroes":[],"reach":[["Sticky Fingers",8]]},{"at":"110/38","locs":[110],"label":"","conds":[["Champion of the Smallfolk",null,true,3]],"chapter":[],"heroes":[],"reach":[["Champion of the Smallfolk",6]]},{"at":"110/38","locs":[110],"label":"","conds":[["Friend of Nobility",null,true,3]],"chapter":[],"heroes":[],"reach":[["Friend of Nobility",5],["Plots and Schemes",7]]},{"at":"111/0","locs":[111],"label":"","conds":[],"chapter":[[10,10,"",0,false]],"heroes":[],"reach":[["Avalon’s Future",8]]},{"at":"111/4","locs":[111],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Topography",7]]},{"at":"112/0","locs":[112],"label":"","conds":[],"chapter":[[2,2,"",1,false]],"heroes":[],"reach":[["Small Favor",2],["Small Favor",3],["Small Favor",5],["Small Favor",8]]},{"at":"112/12","locs":[112],"label":"把他妻子的委托告诉他","conds":[["Small Favor",2,true]],"chapter":[],"heroes":[],"reach":[["Informer",1]]},{"at":"112/12","locs":[112],"label":"把他儿子的委托告诉他","conds":[["Small Favor",4,true]],"chapter":[],"heroes":[],"reach":[["Informer",2]]},{"at":"112/12","locs":[112],"label":"把双生子的委托告诉他","conds":[["Small Favor",3,true]],"chapter":[],"heroes":[],"reach":[["Informer",3]]},{"at":"112/16","locs":[112],"label":"","conds":[["Insolent",2,true]],"chapter":[],"heroes":[],"reach":[["Small Favor",2]]},{"at":"112/16","locs":[112],"label":"","conds":[["Insolent",1,true]],"chapter":[],"heroes":[],"reach":[["Small Favor",2]]},{"at":"112/8","locs":[112],"label":"如果你 持有“小恩小惠” 状态的第 6 部分","conds":[["Small Favor",6,true]],"chapter":[],"heroes":[],"reach":[["Small Favor",1]]},{"at":"113/0","locs":[113],"label":"","conds":[],"chapter":[[2,2,"",1,false]],"heroes":[],"reach":[["Small Favor",4],["Topography",3]]},{"at":"114/0","locs":[114],"label":"","conds":[],"chapter":[[2,2,"",1,false]],"heroes":[],"reach":[["Topography",3]]},{"at":"114/0","locs":[114],"label":"","conds":[["Family Secrets",1,true]],"chapter":[],"heroes":[],"reach":[["Topography",3]]},{"at":"116/1","locs":[116],"label":"","conds":[["Small Favor",2,true],["Small Favor",8,false]],"chapter":[],"heroes":[],"reach":[["Insolent",3]]},{"at":"117/0","locs":[117],"label":"","conds":[],"chapter":[[4,4,"",2,true]],"heroes":[],"reach":[["Rebuilding Lothian",4]]},{"at":"117/0","locs":[117],"label":"1 在南面塔楼的地下室中搜索","conds":[["Faint Notion",4,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",4]]},{"at":"117/5","locs":[117],"label":"","conds":[["Strange Lessons",3,true]],"chapter":[],"heroes":[],"reach":[["Foraging",6],["Wyrdglass Reveals",6]]},{"at":"117/7","locs":[117],"label":"","conds":[["Keys & Passwords",1,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2],["Notable Deeds",4],["Royal Funeral",2]]},{"at":"117/11","locs":[117],"label":"","conds":[["Small Favor",9,true]],"chapter":[],"heroes":[],"reach":[["Royal Funeral",1]]},{"at":"117/11","locs":[117],"label":"","conds":[["Informer",1,true],["Small Favor",8,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2],["Royal Funeral",2]]},{"at":"117/11","locs":[117],"label":"","conds":[["Informer",null,true],["Small Favor",8,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",2],["Royal Funeral",2]]},{"at":"117/11","locs":[117],"label":"","conds":[["Informer",2,true],["Small Favor",7,false]],"chapter":[],"heroes":[],"reach":[["Royal Funeral",3]]},{"at":"117/11","locs":[117],"label":"","conds":[["Informer",null,true],["Small Favor",7,false]],"chapter":[],"heroes":[],"reach":[["Royal Funeral",3]]},{"at":"117/15","locs":[117],"label":"1 搜索南面塔楼的地下室","conds":[["Faint Notion",4,true]],"chapter":[],"heroes":[],"reach":[["Family Secrets",4]]},{"at":"118/0","locs":[118],"label":"","conds":[["Rumors & Hearsay",2,false]],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Rumors & Hearsay",2]]},{"at":"118/0","locs":[118],"label":"","conds":[],"chapter":[[5,5,"",0,true]],"heroes":[],"reach":[["Companions",1],["Negotiator",2],["Rebuilding Lothian",2],["Sticky Fingers",4]]},{"at":"118/0","locs":[118],"label":"","conds":[],"chapter":[[3,3,"",2,true]],"heroes":[],"reach":[["Companions",1],["Failures of the Unknighted",3],["Negotiator",2],["Rebuilding Lothian",2],["Sticky Fingers",4]]},{"at":"118/3","locs":[118],"label":"","conds":[["Negotiator",2,true]],"chapter":[],"heroes":[],"reach":[["Sticky Fingers",4]]},{"at":"118/4","locs":[118],"label":"1 完成埃德的委托","conds":[["Small Favor",7,false],["Small Favor",4,true]],"chapter":[],"heroes":[],"reach":[["Small Favor",7]]},{"at":"119/0","locs":[119],"label":"","conds":[["Personal Matters",1,false]],"chapter":[],"heroes":["Elgan"],"reach":[["Personal Matters",1]]},{"at":"120/0","locs":[120],"label":"","conds":[],"chapter":[[3,3,"",2,true]],"heroes":[],"reach":[["Wyrdglass Reveals",3]]},{"at":"120/1","locs":[120],"label":"","conds":[["Notable Deeds",2,true]],"chapter":[],"heroes":[],"reach":[["Keys & Passwords",1]]},{"at":"121/5","locs":[121],"label":"","conds":[["Sticky Fingers",6,true]],"chapter":[],"heroes":[],"reach":[["Rumors & Hearsay",4]]},{"at":"122/0","locs":[122],"label":"2 尝试穿越沼泽","conds":[["Mapping the Bog",null,true]],"chapter":[[4,4,"",2,true]],"heroes":[],"reach":[["Topography",6]]},{"at":"122/0","locs":[122],"label":"2 前往制烛工坊","conds":[["Personal Matters",2,false]],"chapter":[],"heroes":["Elgan"],"reach":[["Personal Matters",2]]},{"at":"122/2","locs":[122],"label":"2 前往制烛工坊","conds":[["Personal Matters",2,false]],"chapter":[],"heroes":["Elgan"],"reach":[["Personal Matters",2]]},{"at":"123/0","locs":[123],"label":"","conds":[["Topography",5,true]],"chapter":[],"heroes":[],"reach":[["Chance Meetings",1],["Failures of the Unknighted",1],["Faint Notion",4],["Twist of Fate",1]]},{"at":"123/2","locs":[123],"label":"","conds":[["Faint Notion",5,true]],"chapter":[],"heroes":[],"reach":[["Chance Meetings",1],["Failures of the Unknighted",1],["Faint Notion",4],["Topography",5],["Twist of Fate",1]]},{"at":"124/0","locs":[124],"label":"","conds":[],"chapter":[[5,5,"",0,true]],"heroes":[],"reach":[["Companions",2]]},{"at":"124/4","locs":[124],"label":"","conds":[["Builders of Sorlois",2,true]],"chapter":[],"heroes":[],"reach":[["Curios",8]]},{"at":"124/4","locs":[124],"label":"1 将发光的石块嵌入孔洞中","conds":[["Builders of Sorlois",1,true]],"chapter":[],"heroes":[],"reach":[["Builders of Sorlois",2],["Curios",8]]},{"at":"124/6","locs":[124],"label":"","conds":[["Curios",7,true]],"chapter":[],"heroes":[],"reach":[["Curios",8]]},{"at":"124/9","locs":[124],"label":"1 将发光石堆放在墙角","conds":[["Builders of Sorlois",1,true],["Builders of Sorlois",3,false]],"chapter":[],"heroes":[],"reach":[["Builders of Sorlois",3],["Builders of Sorlois",4],["Curios",8]]},{"at":"124/9","locs":[124],"label":"","conds":[["Builders of Sorlois",3,true],["Builders of Sorlois",4,false]],"chapter":[],"heroes":[],"reach":[["Builders of Sorlois",4],["Curios",8]]},{"at":"125/4","locs":[125],"label":"","conds":[["Notable Deeds",6,true]],"chapter":[],"heroes":[],"reach":[["Negotiator",6],["Notable Deeds",6]]},{"at":"125/6","locs":[125],"label":"","conds":[["Insolent",4,true]],"chapter":[],"heroes":[],"reach":[["Insolent",4],["Notable Deeds",6],["Personal Matters",4],["Personal Matters",5]]},{"at":"125/6","locs":[125],"label":"","conds":[],"chapter":[],"heroes":["Gerdwyn"],"reach":[["End of the Road",1],["Informer",4],["Insolent",4],["Notable Deeds",6],["Personal Matters",3],["Personal Matters",4],["Personal Matters",5]]},{"at":"125/10","locs":[125],"label":"如果你在进行 章节4：第2部分","conds":[],"chapter":[[4,4,"",2,false]],"heroes":[],"reach":[["Negotiator",6],["Notable Deeds",6]]},{"at":"126/2","locs":[126],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Negotiator",4]]},{"at":"127/1","locs":[127],"label":"","conds":[],"chapter":[[6,6,"",1,false]],"heroes":[],"reach":[["Bureaucracy",1],["Rumors & Hearsay",5],["Suppression",1]]},{"at":"127/1","locs":[127],"label":"","conds":[],"chapter":[[9,9,"B",1,false]],"heroes":[],"reach":[["Venedian Path",9]]},{"at":"128/22","locs":[128],"label":"","conds":[["Embers",1,true]],"chapter":[],"heroes":[],"reach":[["Embers",2]]},{"at":"128/10","locs":[128],"label":"","conds":[["Venedian Path",3,true]],"chapter":[],"heroes":[],"reach":[["Plots and Schemes",9],["Secret Messages",2],["Venedian Path",3]]},{"at":"128/0","locs":[128],"label":"2 执行仪式","conds":[],"chapter":[[8,8,"A",0,false]],"heroes":[],"reach":[["Plots and Schemes",8]]},{"at":"128/2","locs":[128],"label":"","conds":[],"chapter":[[9,9,"B",0,true]],"heroes":[],"reach":[["Embers",1],["Embers",2]]},{"at":"128/2","locs":[128],"label":"研究发黑的植物和草药","conds":[["Stocking Up",9,false]],"chapter":[],"heroes":["Elgan"],"reach":[["Plots and Schemes",9],["Secret Messages",2],["Stocking Up",9],["Venedian Path",3]]},{"at":"128/7","locs":[128],"label":"","conds":[["Plots and Schemes",9,true]],"chapter":[],"heroes":[],"reach":[["Plots and Schemes",9],["Secret Messages",2],["Venedian Path",3]]},{"at":"129/0","locs":[129],"label":"","conds":[["Chance Meetings",2,true]],"chapter":[],"heroes":[],"reach":[["Chance Meetings",2],["Negotiator",7],["Rummaging",3]]},{"at":"129/13","locs":[129],"label":"询问他是否想要成为一位“蜜圣”","conds":[["Negotiator",7,true]],"chapter":[],"heroes":[],"reach":[["Cold Heart",5]]},{"at":"130/3","locs":[130],"label":"","conds":[["Rummaging",6,true]],"chapter":[],"heroes":[],"reach":[["Companions",3],["Wyrdglass Reveals",7]]},{"at":"130/11","locs":[130],"label":"","conds":[["Wyrdglass Reveals",7,true]],"chapter":[],"heroes":[],"reach":[["Companions",3],["Wyrdglass Reveals",7]]},{"at":"131/0","locs":[131],"label":"","conds":[],"chapter":[[9,9,"B",0,true]],"heroes":[],"reach":[["Embers",3]]},{"at":"131/5","locs":[131],"label":"对暗号","conds":[["Secret Messages",2,true]],"chapter":[],"heroes":[],"reach":[["Topography",8],["Venedian Path",1]]},{"at":"132/0","locs":[132],"label":"","conds":[["Venedian Path",5,true]],"chapter":[],"heroes":[],"reach":[["Venedian Path",3]]},{"at":"132/0","locs":[132],"label":"","conds":[["Venedian Path",2,true]],"chapter":[],"heroes":[],"reach":[["Venedian Path",5]]},{"at":"132/1","locs":[132],"label":"1 招募木雕匠人","conds":[["Chance Meetings",3,true]],"chapter":[],"heroes":[],"reach":[["Venedian Path",4]]},{"at":"133/2","locs":[133],"label":"","conds":[["Risk Taker",6,true]],"chapter":[],"heroes":[],"reach":[["Twist of Fate",2],["Venedian Path",6]]},{"at":"133/5","locs":[133],"label":"请她们召唤一场风暴","conds":[],"chapter":[[7,7,"A",1,false]],"heroes":[],"reach":[["Twist of Fate",2],["Venedian Path",6]]},{"at":"133/12","locs":[133],"label":"","conds":[["Twist of Fate",2,true]],"chapter":[],"heroes":[],"reach":[["Venedian Path",6]]},{"at":"134/0","locs":[134],"label":"2 说服当地人加入你的联盟","conds":[["Venedian Path",9,true]],"chapter":[[9,9,"B",0,true]],"heroes":[],"reach":[["Blackwood Alliance",3]]},{"at":"134/0","locs":[134],"label":"1 在弗林斯克外的田野中搜索","conds":[["Rumors & Hearsay",7,true]],"chapter":[],"heroes":[],"reach":[["Sharp Truth",2]]},{"at":"134/4","locs":[134],"label":"1 询问当地人，这里是否发生了什么“事故”","conds":[["Rumors & Hearsay",7,true]],"chapter":[],"heroes":[],"reach":[["Rumors & Hearsay",6]]},{"at":"134/4","locs":[134],"label":"1 寻找安德里","conds":[["Rumors & Hearsay",7,true]],"chapter":[],"heroes":[],"reach":[["Terrors and Perils",8]]},{"at":"134/4","locs":[134],"label":"展示你的调查结果","conds":[["Sharp Truth",2,true],["Champion of the Smallfolk",5,false]],"chapter":[],"heroes":[],"reach":[["Champion of the Smallfolk",5],["Informer",6]]},{"at":"134/8","locs":[134],"label":"告诉他，你是这里的新领主，并把地契给他看","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Cold Heart",7],["Rumors & Hearsay",7]]},{"at":"134/13","locs":[134],"label":"","conds":[["Champion of the Smallfolk",5,true]],"chapter":[],"heroes":[],"reach":[["Strange Lessons",9]]},{"at":"134/21","locs":[134],"label":"","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Cold Heart",7],["Rumors & Hearsay",7]]},{"at":"134/29","locs":[134],"label":"","conds":[["End of the Road",3,true]],"chapter":[],"heroes":["Osbert"],"reach":[["Blackwood Alliance",3]]},{"at":"135/0","locs":[135],"label":"","conds":[["Venedian Path",6,true]],"chapter":[],"heroes":[],"reach":[["Rummaging",7],["Venedian Path",7],["Venedian Path",8]]},{"at":"135/1","locs":[135],"label":"1 寻找伊西多的小屋","conds":[["Old Records",5,true]],"chapter":[],"heroes":[],"reach":[["Kendrick",3],["Sharp Truth",5]]},{"at":"135/4","locs":[135],"label":"1 寻找伊西多的小屋","conds":[["Old Records",5,true]],"chapter":[],"heroes":[],"reach":[["Kendrick",3],["Sharp Truth",5]]},{"at":"135/18","locs":[135],"label":"1 寻找伊西多的小屋","conds":[["Old Records",5,true]],"chapter":[],"heroes":[],"reach":[["Kendrick",3],["Sharp Truth",5]]},{"at":"136/0","locs":[136],"label":"","conds":[["Tracker",3,true],["Tracker",4,false]],"chapter":[],"heroes":[],"reach":[["Amberqueen’s Secrets",4],["Avalon’s Future",4],["Insolent",5],["Risk Taker",7],["Tracker",4]]},{"at":"136/1","locs":[136],"label":"","conds":[["Risk Taker",7,true]],"chapter":[],"heroes":[],"reach":[["Amberqueen’s Secrets",4],["Avalon’s Future",4],["Risk Taker",7]]},{"at":"136/2","locs":[136],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Amberqueen’s Secrets",4],["Avalon’s Future",4],["Insolent",5],["Risk Taker",7]]},{"at":"136/2","locs":[136],"label":"","conds":[],"chapter":[[8,8,"A",2,true]],"heroes":[],"reach":[["Amberqueen’s Secrets",4],["Avalon’s Future",4],["Insolent",5],["Risk Taker",7]]},{"at":"136/3","locs":[136],"label":"","conds":[],"chapter":[[8,8,"A",1,false]],"heroes":[],"reach":[["Amberqueen’s Secrets",4],["Avalon’s Future",4],["Risk Taker",7]]},{"at":"136/5","locs":[136],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Amberqueen’s Secrets",4],["Avalon’s Future",4],["Risk Taker",7]]},{"at":"136/12","locs":[136],"label":"","conds":[],"chapter":[[8,8,"A",1,false]],"heroes":[],"reach":[["Insolent",5]]},{"at":"137/0","locs":[137],"label":"2 帮助海盗夺回佩伦格勒","conds":[["Blackwood Alliance",2,false],["Embers",6,false],["Obstacles",4,true]],"chapter":[],"heroes":[],"reach":[["Blackwood Alliance",2]]},{"at":"137/0","locs":[137],"label":"1 追踪琥珀兽","conds":[["Tracker",2,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",3],["Champion of the Smallfolk",4],["End of the Road",3],["End of the Road",4],["Performances",3],["Personal Matters",7],["Tracker",3],["Venedian Path",3]]},{"at":"137/3","locs":[137],"label":"从远处狙击守塔人，然后顺着锁链爬上高塔","conds":[],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Blackwood Alliance",2]]},{"at":"137/3","locs":[137],"label":"悄无声息地在水上滑行","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Blackwood Alliance",2]]},{"at":"137/3","locs":[137],"label":"从水下游向高塔","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Blackwood Alliance",2]]},{"at":"137/11","locs":[137],"label":"","conds":[],"chapter":[[9,9,"B",0,false]],"heroes":[],"reach":[["Embers",6]]},{"at":"138/0","locs":[138],"label":"","conds":[],"chapter":[[9,9,"B",0,true]],"heroes":[],"reach":[["Amberqueen’s Secrets",3]]},{"at":"138/2","locs":[138],"label":"","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Amberqueen’s Secrets",3]]},{"at":"139/0","locs":[139],"label":"2 寻找贝洛伯格","conds":[["Wyrd Harvest",6,true]],"chapter":[],"heroes":[],"reach":[["Wyrdglass Reveals",2]]},{"at":"139/3","locs":[139],"label":"1 为兹梅烹饪一道美食，来舒缓他的痛苦","conds":[["Old Records",3,true]],"chapter":[],"heroes":[],"reach":[["Terrors and Perils",3]]},{"at":"139/4","locs":[139],"label":"","conds":[["Time Passes: Chapter 8",null,true]],"chapter":[[9,9,"B",0,true]],"heroes":[],"reach":[["Topography",9],["Wyrdglass Reveals",2]]},{"at":"139/4","locs":[139],"label":"与她们一同歌唱","conds":[["Songs of Avalon",null,true]],"chapter":[],"heroes":[],"reach":[["Songs of Avalon",3],["Wyrdglass Reveals",2]]},{"at":"140/2","locs":[140],"label":"1 追踪琥珀兽","conds":[["Tracker",1,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Companions",3],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Notable Deeds",3],["Royal Funeral",5],["Strange Lessons",5],["Tracker",2]]},{"at":"140/7","locs":[140],"label":"询问男人，他是不是瓦雷嘉德，以及他能否帮助你","conds":[],"chapter":[[9,9,"B",4,false]],"heroes":[],"reach":[["Obstacles",4]]},{"at":"140/7","locs":[140],"label":"询问他们，是否要加入黑木联盟","conds":[["Venedian Path",9,true]],"chapter":[[8,8,"A",0,false]],"heroes":[],"reach":[["Obstacles",4]]},{"at":"140/8","locs":[140],"label":"询问牧屋人，小屋是否能为黑木联盟效力","conds":[["Venedian Path",9,true]],"chapter":[],"heroes":[],"reach":[["Blackwood Alliance",4]]},{"at":"140/9","locs":[140],"label":"询问男人，他能否帮助你","conds":[],"chapter":[[9,9,"B",4,false]],"heroes":[],"reach":[["Obstacles",4]]},{"at":"140/9","locs":[140],"label":"询问他们，是否要加入黑木联盟","conds":[["Venedian Path",9,true]],"chapter":[[8,8,"A",0,false]],"heroes":[],"reach":[["Obstacles",4]]},{"at":"150/1","locs":[150],"label":"","conds":[],"chapter":[[6,6,"",1,false]],"heroes":[],"reach":[["Bureaucracy",1],["Rumors & Hearsay",5],["Suppression",1]]},{"at":"150/1","locs":[150],"label":"","conds":[],"chapter":[[9,9,"A",1,false]],"heroes":[],"reach":[["Bureaucracy",1],["Drought",1],["Rumors & Hearsay",5],["Suppression",1]]},{"at":"151/1","locs":[151],"label":"","conds":[],"chapter":[[9,9,"A",0,false]],"heroes":[],"reach":[["Bureaucracy",1]]},{"at":"151/1","locs":[151],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Bureaucracy",1]]},{"at":"152/0","locs":[152],"label":"2 寻找被奴役的人们","conds":[["Chance Meetings",7,true],["Plots and Schemes",4,false]],"chapter":[],"heroes":[],"reach":[["Plots and Schemes",4]]},{"at":"152/0","locs":[152],"label":"寻找卡普蕾莉达的宫殿","conds":[["Rumors & Hearsay",5,true]],"chapter":[],"heroes":[],"reach":[["Faint Notion",8]]},{"at":"152/2","locs":[152],"label":"","conds":[["Personal Matters",7,false]],"chapter":[],"heroes":["Iunis"],"reach":[["Personal Matters",7]]},{"at":"152/5","locs":[152],"label":"","conds":[["Chance Meetings",4,false]],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Chance Meetings",4],["Freedom",1],["Suppression",3]]},{"at":"152/7","locs":[152],"label":"","conds":[["Bishop’s Sins",2,true],["Bishop’s Sins",4,false]],"chapter":[],"heroes":[],"reach":[["Bishop’s Sins",4]]},{"at":"152/9","locs":[152],"label":"查看奴隶的房间","conds":[["Faint Notion",7,true]],"chapter":[],"heroes":[],"reach":[["Bishop’s Sins",5]]},{"at":"152/10","locs":[152],"label":"","conds":[["Negotiator",7,true]],"chapter":[],"heroes":[],"reach":[["Bishop’s Sins",5]]},{"at":"152/10","locs":[152],"label":"出示许可证","conds":[["Bureaucracy",3,true]],"chapter":[],"heroes":[],"reach":[["Bishop’s Sins",5],["Negotiator",7]]},{"at":"152/14","locs":[152],"label":"","conds":[["Friend of Nobility",3,true]],"chapter":[],"heroes":[],"reach":[["Bishop’s Sins",5]]},{"at":"153/12","locs":[153],"label":"","conds":[["Bishop’s Sins",1,false]],"chapter":[[9,9,"",0,false]],"heroes":[],"reach":[["Bishop’s Sins",1]]},{"at":"153/0","locs":[153],"label":"","conds":[],"chapter":[[6,6,"B",3,false]],"heroes":[],"reach":[["Cold Heart",5],["Freedom",2]]},{"at":"153/0","locs":[153],"label":"","conds":[["Chance Meetings",7,false]],"chapter":[[8,8,"B",0,false]],"heroes":[],"reach":[["Chance Meetings",7]]},{"at":"153/0","locs":[153],"label":"顺着卡普蕾莉达给的线索调查","conds":[["Faint Notion",8,true]],"chapter":[],"heroes":[],"reach":[["Bishop’s Sins",1]]},{"at":"154/0","locs":[154],"label":"2 海魔研究员想找乐子，你可以满足他们","conds":[["Performances",3,false]],"chapter":[],"heroes":["Osbert"],"reach":[["Performances",3]]},{"at":"155/1","locs":[155],"label":"","conds":[["Revelry",2,false]],"chapter":[[8,8,"",0,false]],"heroes":[],"reach":[["Revelry",2]]},{"at":"155/1","locs":[155],"label":"前往工匠区","conds":[["Personal Matters",8,false]],"chapter":[],"heroes":["Elgan"],"reach":[["Personal Matters",8]]},{"at":"155/2","locs":[155],"label":"","conds":[],"chapter":[[6,6,"B",0,false]],"heroes":[],"reach":[["Bureaucracy",3]]},{"at":"155/2","locs":[155],"label":"","conds":[["Friend of Nobility",3,true]],"chapter":[[8,8,"B",0,false]],"heroes":[],"reach":[["Old Records",4]]},{"at":"155/7","locs":[155],"label":"寻找秘密房间","conds":[["Keys & Passwords",2,true]],"chapter":[],"heroes":[],"reach":[["Rummaging",9]]},{"at":"155/12","locs":[155],"label":"","conds":[],"chapter":[[6,6,"B",4,false]],"heroes":[],"reach":[["Secret Messages",3]]},{"at":"155/12","locs":[155],"label":"报告在尖塔的遭遇","conds":[["Personal Matters",10,true]],"chapter":[],"heroes":["Iunis"],"reach":[["Informer",5]]},{"at":"155/12","locs":[155],"label":"收取报酬","conds":[["Plots and Schemes",6,false]],"chapter":[],"heroes":["Iunis"],"reach":[["End of the Road",7],["End of the Road",8],["Informer",5],["Plots and Schemes",6]]},{"at":"156/0","locs":[156],"label":"前往竞技场赴约","conds":[["Drought",6,true],["Plots and Schemes",6,false]],"chapter":[],"heroes":["Iunis"],"reach":[["End of the Road",7],["End of the Road",8],["Plots and Schemes",6]]},{"at":"156/0","locs":[156],"label":"进入参议院大楼","conds":[["Freedom",7,true],["Bureaucracy",5,false]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",7],["Bureaucracy",5],["Freedom",8]]},{"at":"156/5","locs":[156],"label":"寻找你的家人","conds":[["Personal Matters",6,true]],"chapter":[],"heroes":["Elgan"],"reach":[["Personal Matters",15]]},{"at":"156/5","locs":[156],"label":"前往莱莎的商店","conds":[["Personal Matters",15,true]],"chapter":[],"heroes":["Elgan"],"reach":[["End of the Road",5],["End of the Road",6]]},{"at":"156/5","locs":[156],"label":"前往图书馆","conds":[["Strange Lessons",6,false]],"chapter":[],"heroes":["Osbert"],"reach":[["Strange Lessons",6]]},{"at":"156/5","locs":[156],"label":"会见来自森郁山的联络人","conds":[["Chance Meetings",7,true],["Plots and Schemes",5,false]],"chapter":[],"heroes":[],"reach":[["Plots and Schemes",5]]},{"at":"156/6","locs":[156],"label":"","conds":[],"chapter":[[7,7,"B",2,false]],"heroes":[],"reach":[["Plots and Schemes",1],["Plots and Schemes",2],["Plots and Schemes",3]]},{"at":"156/6","locs":[156],"label":"","conds":[["Bureaucracy",4,false]],"chapter":[[8,8,"B",0,false]],"heroes":[],"reach":[["Bureaucracy",4]]},{"at":"156/9","locs":[156],"label":"寻找你的家人","conds":[["Personal Matters",6,true]],"chapter":[],"heroes":["Elgan"],"reach":[["Personal Matters",15]]},{"at":"156/9","locs":[156],"label":"前往莱莎的工坊","conds":[["Personal Matters",15,true]],"chapter":[],"heroes":["Elgan"],"reach":[["End of the Road",5],["End of the Road",6]]},{"at":"156/11","locs":[156],"label":"","conds":[["Drought",3,false]],"chapter":[[9,9,"A",3,false]],"heroes":[],"reach":[["Drought",3]]},{"at":"156/11","locs":[156],"label":"","conds":[["Drought",4,true]],"chapter":[[9,9,"A",3,false]],"heroes":[],"reach":[["Drought",8]]},{"at":"157/4","locs":[157],"label":"你看到有个人，躲在用浮木搭成的棚屋里……","conds":[["Revelry",1,true],["Isolut",1,false]],"chapter":[],"heroes":[],"reach":[["Companions",4],["Isolut",1]]},{"at":"158/3","locs":[158],"label":"","conds":[["Topography",8,false]],"chapter":[[7,7,"B",1,false]],"heroes":[],"reach":[["Topography",8]]},{"at":"158/3","locs":[158],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Chance Meetings",5],["Personal Matters",10]]},{"at":"159/2","locs":[159],"label":"","conds":[["Terrors and Perils",2,true]],"chapter":[],"heroes":[],"reach":[["Friend of Nobility",4]]},{"at":"160/0","locs":[160],"label":"","conds":[["Drought",1,true]],"chapter":[],"heroes":[],"reach":[["Twist of Fate",3]]},{"at":"160/0","locs":[160],"label":"拜见居尔佩安议员","conds":[["Old Records",4,true],["Rummaging",4,false]],"chapter":[],"heroes":[],"reach":[["Rummaging",4]]},{"at":"161/0","locs":[161],"label":"在战场上漫步","conds":[["Old Records",3,false]],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Old Records",3]]},{"at":"162/0","locs":[162],"label":"","conds":[],"chapter":[[8,8,"B",0,false]],"heroes":[],"reach":[["Avalon’s Future",6],["Cold Heart",6]]},{"at":"166/7","locs":[166],"label":"","conds":[["Avalon’s Future",8,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",10]]},{"at":"216/0","locs":[216],"label":"","conds":[["Companions",1,true],["Chance Meetings",8,false]],"chapter":[],"heroes":[],"reach":[["Chance Meetings",8]]},{"at":"216/0","locs":[216],"label":"","conds":[],"chapter":[[3,3,"",2,false]],"heroes":[],"reach":[["Rebuilding Lothian",5],["Small Favor",5]]},{"at":"216/0","locs":[216],"label":"","conds":[],"chapter":[[4,4,"",1,false]],"heroes":[],"reach":[["Rebuilding Lothian",5],["Small Favor",5]]},{"at":"216/1","locs":[216],"label":"交易食物和道具","conds":[],"chapter":[[3,10,"",0,false]],"heroes":[],"reach":[["Small Favor",5]]},{"at":"216/2","locs":[216],"label":"","conds":[["Small Favor",6,true]],"chapter":[],"heroes":[],"reach":[["Small Favor",1]]},{"at":"216/4","locs":[216],"label":"同意并偷偷作弊","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Friend of Nobility",2],["Small Favor",9],["Sticky Fingers",5]]},{"at":"216/5","locs":[216],"label":"把他妻子的委托告诉他","conds":[["Small Favor",2,true]],"chapter":[],"heroes":[],"reach":[["Informer",1]]},{"at":"216/5","locs":[216],"label":"把他儿子的委托告诉他","conds":[["Small Favor",4,true]],"chapter":[],"heroes":[],"reach":[["Informer",2]]},{"at":"216/5","locs":[216],"label":"把双生子的委托告诉他","conds":[["Small Favor",3,true]],"chapter":[],"heroes":[],"reach":[["Informer",3]]},{"at":"217/0","locs":[217],"label":"1 在城里表演","conds":[["Performances",4,false]],"chapter":[],"heroes":["Osbert"],"reach":[["Performances",4]]},{"at":"217/4","locs":[217],"label":"","conds":[["Stocking Up",5,false]],"chapter":[],"heroes":["Elgan"],"reach":[["Stocking Up",5]]},{"at":"217/4","locs":[217],"label":"","conds":[["Stocking Up",6,false]],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Stocking Up",6]]},{"at":"217/6","locs":[217],"label":"","conds":[["Stocking Up",7,false]],"chapter":[],"heroes":["Osbert"],"reach":[["Stocking Up",7]]},{"at":"217/6","locs":[217],"label":"","conds":[["Stocking Up",8,false]],"chapter":[],"heroes":["Iunis"],"reach":[["Stocking Up",8]]},{"at":"217/10","locs":[217],"label":"","conds":[["Informer",4,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Royal Funeral",5]]},{"at":"217/10","locs":[217],"label":"","conds":[["Family Secrets",7,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Avalon’s Future",3]]},{"at":"217/10","locs":[217],"label":"","conds":[["Family Secrets",8,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Avalon’s Future",3]]},{"at":"217/10","locs":[217],"label":"","conds":[["Family Secrets",9,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",2],["Avalon’s Future",3]]},{"at":"217/10","locs":[217],"label":"","conds":[["Family Secrets",10,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",3]]},{"at":"217/10","locs":[217],"label":"","conds":[["Royal Funeral",1,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Avalon’s Future",3]]},{"at":"218/0","locs":[218],"label":"","conds":[["Rumors & Hearsay",2,false]],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Rumors & Hearsay",2]]},{"at":"218/0","locs":[218],"label":"","conds":[],"chapter":[[5,5,"",0,true]],"heroes":[],"reach":[["Companions",1],["Rebuilding Lothian",6]]},{"at":"218/0","locs":[218],"label":"","conds":[],"chapter":[[3,3,"",2,true]],"heroes":[],"reach":[["Companions",1],["Failures of the Unknighted",3],["Rebuilding Lothian",6]]},{"at":"218/3","locs":[218],"label":"1 完成埃德的委托","conds":[["Small Favor",7,false],["Small Favor",4,true]],"chapter":[],"heroes":[],"reach":[["Small Favor",7]]},{"at":"219/0","locs":[219],"label":"","conds":[["Personal Matters",1,false]],"chapter":[],"heroes":["Elgan"],"reach":[["Personal Matters",1]]},{"at":"232/0","locs":[232],"label":"","conds":[["Venedian Path",5,true]],"chapter":[],"heroes":[],"reach":[["Venedian Path",3]]},{"at":"232/0","locs":[232],"label":"","conds":[["Venedian Path",2,true]],"chapter":[],"heroes":[],"reach":[["Venedian Path",5]]},{"at":"232/1","locs":[232],"label":"2 在杰热米耶表演","conds":[["Performances",3,false]],"chapter":[],"heroes":["Osbert"],"reach":[["Performances",3],["Personal Matters",7]]},{"at":"232/1","locs":[232],"label":"1 说服陌生人担任蜜圣","conds":[["Negotiator",7,true]],"chapter":[],"heroes":[],"reach":[["Cold Heart",6]]},{"at":"332/2","locs":[332],"label":"2 为难民表演","conds":[["Performances",3,false]],"chapter":[],"heroes":["Osbert"],"reach":[["Performances",3],["Personal Matters",7]]},{"at":"241/0","locs":[241],"label":"","conds":[],"chapter":[[9,9,"B",0,true]],"heroes":[],"reach":[["Embers",4]]},{"at":"241/0","locs":[241],"label":"1 追踪琥珀兽","conds":[["Venedian Path",9,true]],"chapter":[],"heroes":[],"reach":[["Forbidden Land",6],["Old Records",1],["Rummaging",1],["Tracker",1]]},{"at":"241/15","locs":[241],"label":"拜访奥洛夫","conds":[["Venedian Path",3,true]],"chapter":[],"heroes":[],"reach":[["Amberqueen’s Secrets",1],["Embers",5],["Faint Notion",9]]},{"at":"241/16","locs":[241],"label":"","conds":[["Embers",5,true]],"chapter":[],"heroes":[],"reach":[["Amberqueen’s Secrets",1],["Faint Notion",9]]},{"at":"241/17","locs":[241],"label":"询问奥洛夫，是否知道铁壁战团","conds":[],"chapter":[],"heroes":["Gerdwyn"],"reach":[["Amberqueen’s Secrets",1],["Faint Notion",9]]},{"at":"241/17","locs":[241],"label":"询问奥洛夫，对你的地契有什么看法","conds":[],"chapter":[],"heroes":["Osbert"],"reach":[["Amberqueen’s Secrets",1],["Faint Notion",9]]},{"at":"252/1","locs":[252],"label":"","conds":[["Bishop’s Sins",2,true],["Bishop’s Sins",4,false]],"chapter":[],"heroes":[],"reach":[["Bishop’s Sins",4]]},{"at":"252/4","locs":[252],"label":"查看奴隶的房间","conds":[["Faint Notion",7,true]],"chapter":[],"heroes":[],"reach":[["Bishop’s Sins",5]]},{"at":"254/0","locs":[254],"label":"","conds":[["Drought",7,false]],"chapter":[[9,9,"A",0,false]],"heroes":[],"reach":[["Companions",4],["Isolut",1],["Revelry",1]]},{"at":"255/1","locs":[255],"label":"收取报酬","conds":[["Plots and Schemes",6,false]],"chapter":[],"heroes":["Iunis"],"reach":[["End of the Road",7],["End of the Road",8],["Informer",5],["Plots and Schemes",6]]},{"at":"255/2","locs":[255],"label":"","conds":[["Drought",2,false]],"chapter":[[9,9,"A",3,false]],"heroes":[],"reach":[["Drought",2]]},{"at":"258/0","locs":[258],"label":"","conds":[["Drought",1,true]],"chapter":[],"heroes":[],"reach":[["Curios",9],["Drought",5]]},{"at":"114/9","locs":[114],"label":"2 放下沾满血的娃娃，静静等待","conds":[["Small Favor",3,true]],"chapter":[],"heroes":[],"reach":[["Small Favor",6]]},{"at":"140/20","locs":[140],"label":"2 追赶木屋","conds":[["Risk Taker",4,true]],"chapter":[],"heroes":[],"reach":[["Sharp Truth",3]]},{"at":"140/20","locs":[140],"label":"1 追踪琥珀兽","conds":[["Tracker",1,true]],"chapter":[],"heroes":[],"reach":[["Avalon’s Future",1],["Companions",3],["Family Secrets",7],["Family Secrets",9],["Family Secrets",10],["Notable Deeds",3],["Royal Funeral",5],["Strange Lessons",5],["Tracker",2]]},{"at":"1001/1256","locs":[156],"label":"","conds":[],"chapter":[],"heroes":["Iunis"],"reach":[["Drought",8]]}],"leads":[{"at":"101/12","text":"住在风车里的年轻女孩很可能被一群怪人带走了，他们正沿着老路往扭曲卫兵西边去。 新线索： 如果你想要帮助这一家人存活下去，最好给他们一根新的冥尘蜡烛。","keys":[["Negotiator",1]],"locs":[101]},{"at":"999/24","text":"也许还有其他能把强盗赶走的方法，不必牵扯更多的杀戮。","keys":[["Cold Heart",2]],"locs":[105]},{"at":"999/10","text":"你找到了曲腿女的家。如果遇到合适的时机，你可以将这一发现与洛斯王或者是他的家族成员对质。","keys":[["Family Secrets",1]],"locs":[114]},{"at":"999/13","text":"之后回来见见卡伊，到时再决定接下来怎么办。","keys":[["Personal Matters",15]],"locs":[156]},{"at":"999/35","text":"也许还有其他能把强盗赶走的方法，不必牵扯更多的杀戮。","keys":[["Cold Heart",3]],"locs":[105]},{"at":"999/58","text":"也许还有其他能把强盗赶走的方法，不必牵扯更多的杀戮。","keys":[["Cold Heart",1]],"locs":[106]},{"at":"999/87","text":"找到罗尔夫去了哪儿，追回战旗、战团的记录以及全部资产。","keys":[["Insolent",4]],"locs":[125,241]},{"at":"999/112","text":"你收集到的材料会放在该秘密牌上，这些材料将用于修建洛锡安城堡附近的建筑，以及在周边地点建造防御工事。","keys":[["Topography",4]],"locs":[112,116]},{"at":"999/114","text":"在深入未完之城索雷斯前，你需要确保自己头脑清醒，足够理智。 新线索： 当冥尘驱散时，索雷斯不幸的居民就会涌上街道。","keys":[["Topography",5]],"locs":[123]},{"at":"999/118","text":"出于某种原因，洛斯王伪造了奥芙瑞德王后的妹妹，希柏瑞德的死。","keys":[["Family Secrets",3]],"locs":[]},{"at":"999/145","text":"也许还有其他能把强盗赶走的方法，不必牵扯更多的杀戮。","keys":[["Cold Heart",4]],"locs":[103,203]},{"at":"999/147","text":"如果你协助了乡村别墅和马里亚纳的奴隶，请前往大庄园开启起义作战。","keys":[["Plots and Schemes",4]],"locs":[152]},{"at":"999/136","text":"多洛雷斯双生子要求你将娃娃沾上他们的血，然后带去森林中央，作为诱饵。","keys":[["Small Favor",3]],"locs":[112,216]},{"at":"999/161","text":"从现在起，你可以去洛锡安营地（ 116b ），质问嫌疑人或者发起指控。指控前，你最好已经洞悉了完整的故事，包括一个可信的动机！","keys":[["Family Secrets",2]],"locs":[117]},{"at":"999/165","text":"前往东南方向的索斯兰，找到罗尔夫重组后的铁壁战团。","keys":[["Rumors & Hearsay",2]],"locs":[118,218]},{"at":"999/166","text":"守卫声称，在洛锡安城堡南面的塔楼底下，有个隐藏的地牢。在王国陨落之前，那里曾囚禁着一位女性罪犯。","keys":[["Faint Notion",4]],"locs":[123]},{"at":"999/176","text":"无论你是要战斗还是谈判，在有防御工事的地点一定能事半功倍。","keys":[["Notable Deeds",2]],"locs":[]},{"at":"999/177","text":"找到拱桥镇，打听你家人的消息。 在本地点上放置1 。","keys":[["Personal Matters",2]],"locs":[122]},{"at":"999/178","text":"从现在你，你可以去洛锡安营地（ 116b ），质问嫌疑人或者发起指控。指控前，你最好已经洞悉了完整的故事，包括一个可信的动机！","keys":[["Family Secrets",2]],"locs":[117]},{"at":"999/187","text":"前往海莫里亚，打听哪位海魔穿着有两条海蛇缠绕船锚图案的长袍。","keys":[["Personal Matters",6]],"locs":[123]},{"at":"999/188","text":"如果你协助了乡村别墅和马里亚纳的奴隶，请前往大庄园开启起义作战。","keys":[["Plots and Schemes",5]],"locs":[156]},{"at":"999/207","text":"召集乡村别墅和东马里亚纳的奴隶，让他们加入大庄园的起义军。","keys":[["Chance Meetings",7]],"locs":[153]},{"at":"999/208","text":"破灭之王现在离开了，你该把注意力放回主线任务上。","keys":[["Notable Deeds",3]],"locs":[]},{"at":"999/209","text":"破灭之王现在离开了，你该把注意力放回主线任务上。","keys":[["Notable Deeds",3]],"locs":[]},{"at":"999/195","text":"为了获得遗器，你必须趁克劳戴因被击败或引开的时候，再次打开通往无处之门。","keys":[["Notable Deeds",2]],"locs":[]},{"at":"999/212","text":"破灭之王现在离开了，你该把注意力放回主线任务上。","keys":[["Notable Deeds",3]],"locs":[140]},{"at":"999/223","text":"破灭之王现在离开了，你该把注意力放回主线任务上。","keys":[["Notable Deeds",3]],"locs":[]},{"at":"999/226","text":"从现在起，你可以去洛锡安营地（ 116b ），质问嫌疑人或者发起指控。指控前，你最好已经洞悉了完整的故事，包括一个可信的动机！","keys":[["Family Secrets",2]],"locs":[117]},{"at":"999/254","text":"埃尔甘的家和工坊就在附近的地点里！","keys":[["Personal Matters",1]],"locs":[119,219]},{"at":"999/264","text":"幽灵学者，肯德里克是一位重要的随从角色。他能告诉你所在地点的信息，以及当前主线任务的提示。但他有时会不太稳定……","keys":[["Old Records",1]],"locs":[124]},{"at":"999/271","text":"你已经取得了赐福蜜酒，是时候返回中心森林，将其交给那里的祭司。","keys":[["Champion of the Smallfolk",4],["Venedian Path",3]],"locs":[130]},{"at":"999/307","text":"前往荒凉峰的山脚下寻找那个生物。","keys":[["Tracker",3]],"locs":[137]},{"at":"999/331","text":"如果你想摆脱冥蚀形态，请拜访位于御道附近的远古之环。 重要： 解除冥蚀形态是不可逆的！你无法再重新回到这一形态。","keys":[["Secret Messages",3]],"locs":[141,241]},{"at":"999/357","text":"如果你还想要了解帐篷里事情的经过，必须之后前往洛锡安营地（ 116b ）找到更多的线索。","keys":[["Royal Funeral",3]],"locs":[117]},{"at":"999/358","text":"陪同起义军前往马里亚纳，并在与参议院的谈判中协助他们。","keys":[["Freedom",7]],"locs":[154]},{"at":"999/372","text":"等冥尘聚集时返回黑环，以见证两位好战之神的重逢。","keys":[["Terrors and Perils",3]],"locs":[139]},{"at":"999/427","text":"如果你还想要了解帐篷里事情的经过，必须之后前往洛锡安营地（ 116b ）找到更多的线索。","keys":[["Royal Funeral",3]],"locs":[117]},{"at":"999/506","text":"如果你还想要了解帐篷里事情的经过，必须之后前往洛锡安营地（ 116b ）找到更多的线索。","keys":[["Royal Funeral",2]],"locs":[117]},{"at":"999/511","text":"如果你还想要了解帐篷里事情的经过，必须之后前往洛锡安营地（ 116b ）找到更多的线索。","keys":[["Royal Funeral",2]],"locs":[117]},{"at":"999/515","text":"如果你还想要了解帐篷里事情的经过，必须之后前往洛锡安营地（ 116b ）找到更多的线索。","keys":[["Royal Funeral",1]],"locs":[117]},{"at":"999/523","text":"如果你还想要了解帐篷里事情的经过，必须之后前往洛锡安营地（ 116b ）找到更多的线索。","keys":[["Royal Funeral",1]],"locs":[117]},{"at":"999/534","text":"如果你想摆脱冥蚀形态，请在冥尘覆盖时，拜访位于御道附近的远古之环。 重要： 解除冥蚀形态是不可逆的！你无法再重新回到这一形态。 恭喜你！ 你完成了《 破灭之王 》战役的 章节6B ！ 请检查 “时间流逝（章节6）” 状态的部分数，并结算对应效果： 0-1 神秘莫测的海魔之地完全比不上你的能力。 每名角色各获得1点 经验 并失去2 。 2-3 ：你在主线任务，以及这片奇异大地上的各种支线任务之间，谨慎地保持了平衡。你的印记正在灼烧，催促你赶紧向前，深入未知的未来。 每名角色各获得1点 经验 并失去1 。 4+ 印记发怒了！神秘莫测的土地和异国风俗，都在拖慢你的脚步。如果你逗留太久，诺努斯会知晓你的目标，并阻止你顺利完成。 每名角色各 获得1 。 ○ 弃置事件牌库和激活事件区中的所有卡牌。 ○ 每名角色各获得1点 经验 。 ○ 每位玩家各可以支付 经验 ，来强化属性、购买技能以及强化战斗/ 谈判牌库（详见规则手册第13 页“角色属性与强化”）。 ○ 现在是暂停的好时机！你可以保存游戏进度，或找到 章节7B 的设置牌，并根据指示开始下一章节！","keys":[["Secret Messages",3]],"locs":[155]},{"at":"999/535","text":"你现在知道了，为什么维妮达想要那块特殊的琥珀。你还知道了，这种生物对西阿瓦隆的人类而言会是多大的威胁！","keys":[["Terrors and Perils",9]],"locs":[135]},{"at":"999/537","text":"找到克劳戴因巨型雕像本该建造的位置。","keys":[["Old Records",1]],"locs":[124,241]},{"at":"999/572","text":"前往西北方向寻找贝洛伯格的踪迹，不过你得先想办法穿过难以逾越的高山。","keys":[["Wyrd Harvest",6]],"locs":[]},{"at":"999/574","text":"寻找更多关于克劳戴因失败的原因。下次你和破灭之王对峙之时，这些信息能派上用场。","keys":[["Failures of the Unknighted",1]],"locs":[123]},{"at":"999/577","text":"索斯兰竟然是真的！你现在要做的，就是说服当地居民，与洛锡安的剩余地区重新取得联系。","keys":[["Topography",6]],"locs":[122,125]},{"at":"999/595","text":"现在，你可以回去找索斯兰人，告诉他们你已经阻止了敌人再次来犯。","keys":[["Notable Deeds",6]],"locs":[125]},{"at":"999/581","text":"找到让冥尘远离路口的方法，然后重新回来尝试。","keys":[["Old Records",1]],"locs":[124,241]},{"at":"999/581","text":"冥尘会聚集在没有发光石的地方，也许你能把别处的发光石移到这里？","keys":[["Old Records",1]],"locs":[124,241]},{"at":"1001/692","text":"你可以把发现告诉弗林斯克的村民，不过方式有许多种。","keys":[["Sharp Truth",2]],"locs":[134]},{"at":"1001/720","text":"前往西部的土地寻找琥珀兽。","keys":[["Tracker",1]],"locs":[241]},{"at":"1001/781","text":"调查弗林斯克村以及周边的农田，解开暑热鬼的谜团。","keys":[["Rumors & Hearsay",7]],"locs":[134]},{"at":"1001/835","text":"拜访伊西多在琥珀海岸上的小屋。","keys":[["Old Records",5]],"locs":[]},{"at":"1001/855","text":"搜索马里亚纳城内的下水道。","keys":[["Keys & Passwords",2]],"locs":[]},{"at":"1001/891","text":"发现琥珀女王隐瞒的更多秘密，这能帮助你对抗她。","keys":[["Amberqueen’s Secrets",1]],"locs":[241]},{"at":"1001/941","text":"在佩伦格勒周边的土地上寻找琥珀兽。","keys":[["Tracker",2]],"locs":[140]},{"at":"1001/946","text":"你的琥珀之蛹在维妮达附近似乎有复苏的迹象，这让她的琥珀兽感到困惑。","keys":[["Cold Heart",10]],"locs":[332]},{"at":"1001/994","text":"从现在起，你可以使用攀援树林和兹梅之路之间的密道。","keys":[["Topography",9]],"locs":[241]},{"at":"1001/997","text":"想办法接近铁壁战团，并趁着维妮达不在时解决罗尔夫。","keys":[["Cold Heart",10]],"locs":[332]},{"at":"1001/998","text":"从现在起，你可以使用攀援树林和兹梅之路之间的密道。","keys":[["Topography",9]],"locs":[241]},{"at":"1001/1016","text":"如果你想让奥塔维娅，成为你对抗深渊主教诺努斯的盟友，请去登岸城与她见面。你可以去佛伯格农庄找海魔历史学者，了解更多关于破灭之王的情报。","keys":[["Drought",2]],"locs":[255]},{"at":"1001/1019","text":"回去找卡普蕾莉达，将你和诺努斯的相遇报告给她。","keys":[["Drought",4]],"locs":[169]},{"at":"1001/1027","text":"试图与诺努斯谈判，并传达卡普蕾莉达的消息，这样你才能与她结盟。你可以在佛伯格农庄会见海魔历史学者，来了解更多关于破灭之王的情报。 如果场上没有 深渊主教，诺努斯 ，你可以将其模型放在地点 153 （森郁山），并获得秘密牌 189 。","keys":[["Drought",3]],"locs":[153,156]},{"at":"1001/1062","text":"前往沸腾之门。","keys":[["Drought",5]],"locs":[258]},{"at":"1001/1067","text":"破灭之王所在地点也许隐藏着答案，但你需要先想办法将其翻至 面，并趁着破灭之王不在时进入地点。","keys":[["Cold Heart",10],["Forbidden Land",1]],"locs":[166]},{"at":"105/12","text":"寻找能让你看穿冥尘的工具，西边的城市废墟是个下手的好地方。","keys":[["Obstacles",2]],"locs":[105]},{"at":"105/14","text":"去附近的地点里找个更适合跳水的地方。","keys":[["Obstacles",2]],"locs":[105]},{"at":"105/4","text":"从西边登上能俯瞰马车堡的悬崖，仔细调查地形条件。","keys":[["Topography",1]],"locs":[105]},{"at":"105/6","text":"想办法把这群强盗吓跑。","keys":[["Obstacles",2],["Topography",1]],"locs":[105]},{"at":"105/8","text":"想办法制造出会让人感到恐惧的蜡烛，其原料曾经十分常见，但现在几乎无处可寻。","keys":[["Obstacles",2],["Topography",1]],"locs":[105]},{"at":"105/20","text":"寻找能让你看穿冥尘的工具，西边的城市废墟是个下手的好地方。","keys":[["Obstacles",2]],"locs":[105]},{"at":"112/4","text":"奥芙瑞德王后要求你带回一个神秘物体，就丢弃在洛锡安城堡前，千万不能让她的丈夫知道。","keys":[["Small Favor",2]],"locs":[112]},{"at":"113/6","text":"洛斯的儿子想要你在远征队抵达城堡后，立刻找回埋在墓中的手镯，那里有一块白色大理石墓碑。","keys":[["Topography",3]],"locs":[113]},{"at":"116/3","text":"你已经知道了如何带领远征队穿越森林。","keys":[["Topography",4]],"locs":[116]},{"at":"118/1","text":"你完成了部分工作！你可以回去找洛斯王，或者去附近的地点修复其他建筑。","keys":[["Rebuilding Lothian",2]],"locs":[118]},{"at":"118/7","text":"回去找埃德，证明你完成了任务。或者，你也可以找个大点的城镇，把手镯卖了。","keys":[["Small Favor",7]],"locs":[118]},{"at":"119/1","text":"你完成了部分工作！你可以回去找洛斯王，或者去附近的地点修复其他建筑。","keys":[["Rebuilding Lothian",3]],"locs":[119]},{"at":"120/2","text":"在你打开门之前，最好做足准备……","keys":[["Curios",6]],"locs":[120]},{"at":"121/7","text":"前往淹没的堤道（ 122 ），在圣希柏瑞德的殉道之地过夜。","keys":[["Rumors & Hearsay",4]],"locs":[121]},{"at":"124/3","text":"你现在有了地图，可以前往城市以南的某处寻找。 你朝索雷斯深处前进，迎面撞上了一群奇怪的市民。","keys":[["Curios",8]],"locs":[124]},{"at":"125/10","text":"只要本地点上还有 ，你就可以和索斯兰的使节团一同返回洛锡安城堡。","keys":[["Negotiator",6],["Notable Deeds",6]],"locs":[125]},{"at":"128/27","text":"为了做好与琥珀女王对峙的准备，你可以前往镰刀湾附近的涅兹多遗址、参加荒凉峰上的安息日活动、潜入阿科纳的维妮达宫殿、或者是前往中心森林寻找幸存的树贤。","keys":[["Embers",1],["Embers",2]],"locs":[128]},{"at":"128/3","text":"一位年轻的侍僧最近离开了黑环，带着一个贵重的东西，要前往名为杰热米耶的小镇，就在黑环的东北方向。帮助他们的话，你会取得切尔诺伯格的协助。","keys":[["Secret Messages",2]],"locs":[128]},{"at":"128/5","text":"在弟弟贝洛伯格消失后，切尔诺伯格陷入了沉寂。如果你在阿瓦隆找到了贝洛伯格的踪迹，请回到黑环报告消息。","keys":[["Plots and Schemes",9],["Venedian Path",3]],"locs":[128]},{"at":"129/8","text":"在“蜜圣”改变主意之前，回去找蜜蜂。","keys":[["Cold Heart",5]],"locs":[129]},{"at":"129/10","text":"在阿科纳的时候，替阿斯科德大公传话。","keys":[["Chance Meetings",2]],"locs":[129]},{"at":"131/15","text":"继续向北走，试着穿过维妮达的所在地。","keys":[["Embers",3]],"locs":[131]},{"at":"134/1","text":"一段时间之后再去弗林斯克外的农田，看看那里会发生什么。","keys":[["Rumors & Hearsay",7]],"locs":[134]},{"at":"134/2","text":"了解是什么导致了闹鬼，或者趁着天气合适的时候，进入弗林斯克外的田野调查。","keys":[["Rumors & Hearsay",7]],"locs":[134]},{"at":"134/3","text":"为了确保无误，过段时间最好再去一次弗林斯克外的农田。","keys":[["Informer",6]],"locs":[134]},{"at":"134/5","text":"如果你想说服当地人反抗维妮达，必须先和他们的领主谈谈。","keys":[["Rumors & Hearsay",7]],"locs":[134]},{"at":"134/10","text":"一段时间之后返回弗林斯克外的农田，查看玛拉德娜的情况。","keys":[["Rumors & Hearsay",7]],"locs":[134]},{"at":"135/2","text":"看来大颗的琥珀蛋不容易遇到，也许你该向了解琥珀搜寻技巧的人求助？","keys":[["Rummaging",5]],"locs":[135]},{"at":"135/8","text":"为了弄清楚琥珀兽的本质，你需要找到比普通的渔夫更了解它们的人。 新线索： 据说，维妮达的政策为涅兹多城带去了悲剧。如今，那里成了一片废墟，就在这里的东北方向。","keys":[["Old Records",3]],"locs":[135]},{"at":"135/14","text":"前往洛锡安的光复之地（ 126 ）找到宝物。","keys":[["Old Records",3]],"locs":[135]},{"at":"136/1","text":"你需要伪装成琥珀女巫会的成员，才能加入节庆。如果没有相关物件，你必须先想办法得到一个。","keys":[["Tracker",4]],"locs":[136]},{"at":"136/16","text":"加入安息日，帮助你的盟友夺回对它族群的统治权。","keys":[["Tracker",4]],"locs":[136]},{"at":"140/6","text":"从现在起，如有必要，你可以伪装成女巫会成员。","keys":[["Sharp Truth",3]],"locs":[140]},{"at":"140/11","text":"前往佩伦格勒，帮助瓦雷嘉德和他的海盗夺回城市。","keys":[["Obstacles",4]],"locs":[140]},{"at":"140/18","text":"前往佩伦格勒，通过解除港口的铁链封锁，来协助瓦雷嘉德和他的海盗夺回城市。","keys":[["Obstacles",4]],"locs":[140]},{"at":"151/7","text":"北岸码头的军需官需要一个劳动力，方便维持整个营地。","keys":[["Drought",1]],"locs":[151]},{"at":"155/11","text":"去登岸城和居尔佩安议员见面，并协助他完成调查。","keys":[["Old Records",4]],"locs":[155]},{"at":"159/2","text":"前往森郁山寻找冥尘精华。","keys":[["Friend of Nobility",4]],"locs":[159]},{"at":"217/12","text":"一个怪人试图在演出结束后接近你。你的口袋里存放着维尼迪亚一幢别墅的地契，只怕那人和此物有关。","keys":[["Performances",4]],"locs":[217]},{"at":"218/2","text":"回去找埃德，证明你完成了任务。或者，你也可以找个大点的城镇，把手镯卖了。","keys":[["Small Favor",7]],"locs":[218]},{"at":"232/2","text":"你可以花大价钱买下蜜酒，但也有更便宜的取得方式。你可以在节庆结束后再来看看。","keys":[["Venedian Path",3]],"locs":[232]},{"at":"241/18","text":"切尔诺伯格的修道院位于这片土地的南部，那里的人也许知道维妮达的历史。","keys":[["Embers",5]],"locs":[241]},{"at":"241/19","text":"罗尔夫所带领的铁壁战团，如今位于中心森林西南方向的阿科纳。","keys":[["Embers",5]],"locs":[241]},{"at":"241/20","text":"你地契上提及的土地，弗林斯克村，就在中心森林的东北方向。","keys":[["Embers",5]],"locs":[241]},{"at":"136/24","text":"通过更为常规的手段协助黑木联盟，请寻找盟友，以及能削弱维妮达政治势力的机会。","keys":[["Insolent",5]],"locs":[136]},{"at":"1001/1212","text":"在未完之城索雷斯中找到地图的第二部分。","keys":[["Curios",7]],"locs":[]},{"at":"1001/1232","text":"想办法获取关于琥珀生物的更多信息。","keys":[["Strange Lessons",7]],"locs":[135]},{"at":"1001/1245","text":"返回别墅，想办法与这片土地的统治者交谈。","keys":[["Cold Heart",7]],"locs":[134]},{"at":"999/134","text":"如果你无法在晴天穿过树林，为什么不在冥尘弥漫时再来试一试？","keys":[["Topography",3]],"hide":[["Topography",4]],"locs":[115]},{"at":"112/13","text":"洛斯害怕森林里的扭曲女人。","keys":[["Faint Notion",3]],"hide":[["Family Secrets",1]],"locs":[112]},{"at":"117/7","text":"只有洛斯王知道如何打开内门。继续为他工作，直到你找到开门的方法。","keys":[["Topography",4]],"hide":[["Notable Deeds",4]],"locs":[117]},{"at":"125/7","text":"维尼迪亚和海魔都没有援助洛斯。你想知道其中的原因…… 新线索： 在洛锡安陨落前进犯的山地部落，如今已消亡大半，但还有一小部分成员存活下来，住在岛上难以抵达的隐秘角落。","keys":[["Topography",6]],"hide":[["Failures of the Unknighted",4]],"locs":[125]},{"at":"126/1","text":"想其他办法抵达洛锡安南部，并告诉那里的人们城堡已经夺回。","keys":[["Rebuilding Lothian",4]],"hide":[["Topography",6]],"locs":[126]},{"at":"134/13","text":"据说镰刀湾的大魔女能操纵天气，中心森林的树贤也有同样的能力。","keys":[["Rumors & Hearsay",7]],"hide":[["Sharp Truth",2]],"locs":[134,141]},{"at":"134/24","text":"找到闹鬼的目击者。","keys":[["Rumors & Hearsay",7]],"hide":[["Terrors and Perils",8]],"locs":[134]},{"at":"155/9","text":"你可以在卡普蕾莉达的别墅中见到她，但必须先获得 “时间流逝（当前章节）” 状态的至少 1 个部分。","keys":[["Rumors & Hearsay",5]],"hide":[["Faint Notion",8]],"locs":[155]},{"at":"1001/1204","text":"双生子提到了森林里的曲腿女。如果你还没找到她，也许现在是时候去拜访她了？","keys":[["Small Favor",3]],"hide":[["Family Secrets",1]],"locs":[140]},{"at":"1001/1206","text":"国王似乎在责怪谁，那个人在城堡的东面有一座雕像。","keys":[["Royal Funeral",null]],"hide":[["Rumors & Hearsay",4]],"locs":[216]},{"at":"1001/1207","text":"王后提到了档案管理员，就在东洛锡安的巨大图书馆里。","keys":[["Royal Funeral",null]],"hide":[["Faint Notion",6],["Family Secrets",5]],"locs":[216]},{"at":"134/34","text":"前往弗林斯克，看看那里发生了什么。","keys":[["Venedian Path",9]],"hide":[["Rumors & Hearsay",7]],"locs":[134]},{"at":"1001/1215","text":"你需要的武器已经伴随着洛锡安王国一同消失。但这里的不远处有个洛锡安小镇废墟，就在湖边……","keys":[["Topography",1]],"hide":[["Stocking Up",2]],"locs":[106]},{"at":"155/8","text":"海魔议员想让你去诺努斯的宅邸，帮他拿到一张特定的地图。","keys":[["Bureaucracy",3]],"hide":[["Friend of Nobility",3],["Informer",5]],"locs":[155]},{"at":"999/52","text":"返回避难之地获取报酬。 新线索： 奇怪的歌声会与冥尘共鸣，想办法利用这一点。","keys":[["Champion of the Smallfolk",1],["Songs of Avalon",1]],"hide":[["Curios",4]],"locs":[]},{"at":"999/152","text":"返回避难之地获取报酬。 新线索： 奇怪的歌声会与冥尘共鸣。如果你能想办法增强音量，将会得到……出人意料的结果。","keys":[["Champion of the Smallfolk",1],["Songs of Avalon",1]],"hide":[["Curios",4]],"locs":[108]},{"at":"999/199","text":"无论是要让洛锡安恢复繁荣，或完成你的个人目标，你都必须找到克劳戴因并将他绳之以法。从被击退时留下的路径看，他应该是从城堡往未完之城去了。","keys":[["Avalon’s Future",1],["Avalon’s Future",2],["Avalon’s Future",3]],"hide":[["Facing the Ruin",1],["Forbidden Land",1]],"locs":[137,217]},{"at":"999/233","text":"把书还给奥芙瑞德，或者选择私吞。","keys":[["Insolent",3]],"hide":[["Small Favor",8]],"locs":[116]},{"at":"999/342","text":"洛锡安中的一片新区域开放了，你可以通过淹没的堤道（ 122 ）抵达那里。 新线索（戈德温）： 在洛锡安的东南部有个佣兵营地，那里也许和重组的铁壁战团有关！ 如果本地点上有骰子，移除该骰子。无论是否移除骰子，选择一项：","keys":[["Family Secrets",7],["Family Secrets",8],["Family Secrets",9],["Family Secrets",10]],"hide":[["Topography",6]],"locs":[216]},{"at":"105/1","text":"你必须另寻方式通过马车堡，以抵达北方的御道。 重要： 你刚完成了一个主线任务，并开始进行下一个。《污痕圣杯》是一款开放世界冒险游戏，玩家可以同时尝试多个支线任务和不同的方向。根据你的选择，部分章节可能会耗时更久。所以这就是为何在完成章节中的重要部分后，探索日志会提示你 “现在是暂停的好时机” 。如果你看到这样的提示，请考虑暂停游戏并存档。因为要前往下一个推荐的存档点，可能会再花上好几个小时！ 注意： 你也可以在推荐的存档点外存档，但会需要更多步骤，或者记录更多的信息。如果需要存档，建议选择在一天之中开始时。 现在是暂停的好时机！你可以存档，或是选择继续游戏。","keys":[["Obstacles",1]],"hide":[["Small Favor",2],["Friend of Nobility",2]],"locs":[105]},{"at":"105/2","text":"通往北方的道路已经打开！","keys":[["Obstacles",1]],"hide":[["Small Favor",2],["Friend of Nobility",2]],"locs":[105]},{"at":"120/3","text":"你可以打破洛锡安城堡主楼大门上的符文了。","keys":[["Keys & Passwords",1]],"hide":[["Notable Deeds",4]],"locs":[120]},{"at":"124/12","text":"提示： 如果想要拜访未完之城内的更多地点，请在 时进入此处。但要注意，虽然索雷斯的居民不会在冥尘出现时上街，但浓雾也有可能挡住一些现在能进入的地区。","keys":[["Builders of Sorlois",3],["Builders of Sorlois",4]],"hide":[["Notable Deeds",5]],"locs":[124]},{"at":"999/281","text":"你现在知道了“蜜圣”的含义，但这片大地上说不定有人会愿意做这件事？","keys":[["Negotiator",7]],"hide":[["Cold Heart",5],["Cold Heart",6]],"locs":[129]},{"at":"999/288","text":"给蜜蜂们找个愿意当“蜜圣”的人。","keys":[["Negotiator",7]],"hide":[["Cold Heart",5],["Cold Heart",6]],"locs":[129]},{"at":"121/2","text":"你可以去寻找这股混入了冥尘的水的源头。","keys":[["Strange Lessons",4]],"hide":[["Failures of the Unknighted",1]],"locs":[121]}],"summaries":{},"sources":{},"chapter_refs":{"6A:3":["999/27"],"4:3":["999/78","117/17"],"7B:3":["999/109","156/7"],"5:4":["999/95"],"2:2":["999/112"],"9A:2":["999/144"],"1:7":["999/164","105/2"],"END 2":["999/190"],"4:4":["999/199"],"6B:2":["999/256"],"END 6A":["999/274"],"6B:4":["999/306"],"2:1":["999/314"],"4:2":["999/329"],"8B:2":["999/349","1001/911","1001/1226"],"8B:1":["999/371"],"7B:4":["999/386"],"7B:5":["999/386"],"END 1":["999/410"],"3:2":["999/450"],"6A:2":["999/455"],"3:3":["999/478"],"7B:2":["999/487"],"6B:3":["999/503"],"7A:1":["999/505"],"END 6B":["999/534"],"5:2":["999/546"],"END 3":["999/550"],"END 4":["999/600"],"7A:3":["1001/649"],"END 5":["1001/799"],"8A:4":["1001/806"],"8A:5":["1001/809","1001/811"],"END 7A":["1001/873"],"7A:2":["1001/877"],"END 7B":["1001/913"],"9B:2":["1001/949"],"9B:6":["1001/961"],"END 8A":["1001/963"],"8A:3":["1001/983"],"8A:2":["1001/994"],"8A:1":["1001/998"],"END 9A":["1001/1006"],"9B:3":["1001/1015"],"9A:4":["1001/1034"],"9A:3":["1001/1060"],"10:2":["1001/1067"],"9A:5":["1001/1090"],"END 8B":["1001/1092"],"1:6":["105/1"],"9B:5":["137/21"],"6A:4":["141/2"],"2:3":["216/12"],"9B:4":["241/16"]}};
+const KEY = "tropy-kr-v1";
+const COUNTED_MAX = 6;
+
+const name = s => DATA.names[s] || s.replace(/^Time Passes: Chapter (.+)$/, "时间流逝（第 $1 章）");
+const part = p => p == null ? "" : " 部分 " + p;
+const esc = t => t.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+
+const HEROES = ["Elgan", "Gerdwyn", "Iunis", "Osbert"];
+let state = { owned: [], ch: { n: 1, letter: "", part: 0 }, heroes: [], onMap: [] };
+// a state saved while the page still opened on example statuses is not the player's own
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.owned && !s.sample) state = s; } catch (e) {}
+state.heroes = state.heroes || [];
+state.owned = state.owned.map(k => k.endsWith("|") ? k + "1" : k);  // counted statuses used to be a single "Status|"
+state.onMap = state.onMap || [];  // location cards on the table; empty means show every location
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+const chN = document.getElementById("chN");
+for (let i = 1; i <= 10; i++) chN.add(new Option(i, i));
+
+function chapterText([a, b, letter, p, further]) {
+  return "章节 " + a + (b !== a ? "–" + b : "") + letter + (p ? ", 部分 " + p : "") + (further ? " 或之后" : "");
+}
+
+function place(g) {
+  const [loc, verse] = g.at.split("/");
+  return g.locs.length ? g.locs : ["秘密之书条目 " + verse];
+}
+
+// where to reread a passage in the companion app; the page keeps only the numbers
+const ref = at => {
+  const [loc, verse] = at.split("/");
+  // the app splits the Book of Secrets into two pseudo-locations, 999 (entries 0-600) and 1001 (601-1263)
+  return loc === "999" || loc === "1001" ? "秘密之书条目 " + verse : `地点 ${loc}, 段落 ${verse}`;
+};
+const refs = ats => ats && ats.length ? `<p class="note">应用中的文本: ${ats.slice(0, 3).map(ref).join(" 或 ")}</p>` : "";
+
+// the passage that sent the party into the current chapter part, or closed the previous chapter
+function previousPart({ n, letter, part }) {
+  const keys = part > 1 ? [`${n}${letter}:${part}`, `${n}:${part}`]
+    : [`${n}${letter}:1`, `${n}:1`, `END ${n - 1}${letter}`, `END ${n - 1}`, `END ${n - 1}A`, `END ${n - 1}B`];
+  for (const k of keys) if (DATA.chapter_refs[k]) return [k, DATA.chapter_refs[k]];
+  return null;
+}
+
+function renderChapterIntro() {
+  const found = previousPart(state.ch);
+  const el = document.getElementById("chapterIntro");
+  if (!found) {
+    el.innerHTML = `<p class="note">我不知道结束上一部分的条目。请在页头设置章节和部分。</p>`;
+    return;
+  }
+  const [k, ats] = found;
+  const title = k.startsWith("END") ? "章节结束 " + k.slice(4) : "部分开始 " + k.replace(":", ", 部分 ");
+  // a part can be reached from several branches; every entry is listed, the player knows which one they read
+  el.innerHTML = `<p class="note">${esc(title)}: ${ats.map(ref).join(" 或 ")}</p>`;
+}
+
+function renderStory(owned, relevant) {
+  // per thread: the recap of the highest part owned, earlier parts folded below it
+  const parts = {};
+  for (const k of owned) {
+    const [s, p] = k.split("|");
+    if (DATA.summaries[k]) (parts[s] = parts[s] || []).push(+p);
+  }
+  const threads = Object.entries(parts).map(([s, ps]) => [s, ps.sort((a, b) => a - b)])
+    .sort((a, b) => name(a[0]).localeCompare(name(b[0]), "zh-Hans"));
+  const html = ([s, ps]) => {
+    const top = ps[ps.length - 1];
+    const earlier = ps.slice(0, -1).map(p => `<li value="${p}">${esc(DATA.summaries[s + "|" + p])}</li>`).join("");
+    return `<details class="thread"><summary><b>${esc(name(s))} <span class="num">部分 ${top}</span></b>${esc(DATA.summaries[s + "|" + top])}</summary>${refs(DATA.sources[s + "|" + top])}${earlier ? "<ol>" + earlier + "</ol>" : ""}</details>`;
+  };
+  // threads that open something on the table or hold a live hint come first; the rest fold away
+  const now = threads.filter(([s]) => relevant.has(s)), older = threads.filter(([s]) => !relevant.has(s));
+  document.getElementById("story").innerHTML = threads.length
+    ? "<h2>发生了什么</h2>" +
+      (now.length ? now.map(html).join("") : `<p class="note">目前没有任何故事线在你的地图上开启新内容。</p>`) +
+      (older.length ? `<details class="older"><summary>较早的故事线 (${older.length})</summary>${older.map(html).join("")}</details>` : "")
+    : "";
+}
+
+function renderGo() {
+  const owned = new Set(state.owned);
+  const ch = state.ch;
+  renderChapterIntro();
+  const onTable = locs => !state.onMap.length || !locs.length || locs.some(p => state.onMap.includes(p));
+  const leads = activeLeads(DATA, owned).filter(l => onTable(l.locs));
+  document.getElementById("leads").innerHTML = leads.length
+    ? "<h2>游戏中的线索</h2>" + leads.map(l =>
+        `<div class="lead">${esc(l.text)}<small>${ref(l.at)}</small></div>`).join("")
+    : "";
+
+  const byLoc = (list) => {
+    const m = new Map();
+    for (const g of list) for (const p of place(g)) {
+      if (!m.has(p)) m.set(p, []);
+      m.get(p).push(g);
+    }
+    return [...m].sort((a, b) => b[1].length - a[1].length || String(a[0]).localeCompare(String(b[0]), "zh-Hans", { numeric: true }));
+  };
+  const item = g => {
+    const why = g.conds.filter(c => c[2]).map(([s, p]) => "你拥有 " + name(s) + part(p))
+      .concat(g.heroes.length ? ["适用于: " + g.heroes.join(" 或 ")] : [], g.chapter.map(chapterText));
+    const what = g.label ? esc(g.label.replace(/^\d+\s+/, "")) : "回到这里，有新内容等着你";
+    return `<li>${what}<div class="why">${esc(why.join(" · "))}</div></li>`;
+  };
+  const card = ([p, gs]) => {
+    const seen = new Set();
+    const items = gs.map(item).filter(h => !seen.has(h) && seen.add(h));
+    const title = typeof p === "number"
+      ? `<span class=num>${p}</span> ${esc(DATA.loc_names[p] || "")}` : `<span class=num>${p}</span>`;
+    return `<div class="loc"><h3>${title}</h3><ul>${items.join("")}</ul></div>`;
+  };
+  // book entries have no card, so they stay visible whatever is on the table
+  const shown = list => byLoc(list).filter(([p]) => !state.onMap.length || typeof p !== "number" || state.onMap.includes(p));
+
+  const open = openGates(DATA, owned, ch, new Set(state.heroes));
+  const byStatus = open.filter(g => g.conds.some(c => c[2]));
+  const byHero = open.filter(g => !g.conds.some(c => c[2]) && g.heroes.length);
+  const byChapter = open.filter(g => !g.conds.some(c => c[2]) && !g.heroes.length);
+  document.getElementById("heroGates").innerHTML = shown(byHero).length
+    ? `<h2>适合你的角色</h2>` + shown(byHero).map(card).join("") : "";
+  document.getElementById("gates").innerHTML = "<h2>由你的状态解锁</h2>" +
+    (shown(byStatus).length ? shown(byStatus).map(card).join("") : `<p class="note">勾选的状态目前都没有开启新内容。</p>`);
+  document.getElementById("chapterGates").innerHTML = shown(byChapter).length
+    ? `<h2>本章新内容</h2>` + shown(byChapter).map(card).join("") : "";
+  document.getElementById("mapNote").hidden = state.onMap.length > 0;
+
+  const relevant = new Set(leads.flatMap(l => l.keys.map(k => k[0])));
+  for (const [, gs] of shown(byStatus)) for (const g of gs) for (const c of g.conds) if (c[2]) relevant.add(c[0]);
+  renderStory(owned, relevant);
+}
+
+function renderSheet() {
+  const owned = new Set(state.owned);
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const all = Object.keys(DATA.max_part).filter(s => s !== "Time Passes")
+    .sort((a, b) => name(a).localeCompare(name(b), "zh-Hans"));
+  document.getElementById("list").innerHTML = all.filter(s => !q || name(s).toLowerCase().includes(q)).map(s => {
+    const n = DATA.max_part[s];
+    // a status without numbered parts is a tally: tapping 3 means "I hold three"
+    const tally = !n;
+    const parts = Array.from({ length: n || COUNTED_MAX }, (_, i) => i + 1);
+    return `<div class="st"><b>${esc(name(s))}</b>${tally ? '<span class="note">数量</span>' : ""}<div class="chips">${parts.map(p =>
+      `<button class="chip" data-k="${esc(s + "|" + p)}"${tally ? ' data-tally="1"' : ""} aria-pressed="${owned.has(s + "|" + p)}">${p}</button>`).join("")}</div></div>`;
+  }).join("");
+}
+
+function render() {
+  chN.value = state.ch.n;
+  document.getElementById("chL").value = state.ch.letter;
+  document.getElementById("chP").value = state.ch.part;
+  document.getElementById("party").innerHTML = '<span class="ch">队伍</span>' + HEROES.map(h =>
+    `<button class="chip" data-h="${h}" aria-pressed="${state.heroes.includes(h)}">${h}</button>`).join("");
+  document.getElementById("tabSt").textContent = "状态 (" + state.owned.length + ")";
+  document.getElementById("tabMap").textContent = "地图 (" + state.onMap.length + ")";
+  document.getElementById("maplist").innerHTML = Object.entries(DATA.loc_names).map(([n, nm]) =>
+    `<button class="chip" data-loc="${n}" aria-pressed="${state.onMap.includes(+n)}"><b class="num">${n}</b><span>${esc(nm)}</span></button>`).join("");
+  renderGo();
+  renderSheet();
+}
+
+function tab(view) {
+  for (const [id, t] of [["go", "tabGo"], ["sheet", "tabSt"], ["map", "tabMap"]]) {
+    document.getElementById(id).hidden = id !== view;
+    document.getElementById(t).setAttribute("aria-selected", id === view);
+  }
+}
+document.getElementById("tabGo").onclick = () => tab("go");
+document.getElementById("tabSt").onclick = () => tab("sheet");
+document.getElementById("tabMap").onclick = () => tab("map");
+
+for (const [id, f] of [["chN", "n"], ["chL", "letter"], ["chP", "part"]])
+  document.getElementById(id).onchange = e => {
+    state.ch[f] = f === "letter" ? e.target.value : +e.target.value;
+    save(); render();
+  };
+document.getElementById("q").oninput = renderSheet;
+// each language is its own page; the saved state is shared, so the switch keeps it
+const langSel = document.getElementById("lang");
+langSel.hidden = langSel.options.length < 2;
+langSel.onchange = () => { location.href = langSel.value; };
+
+// state <-> text code (base64 of the JSON; encodeURIComponent keeps Polish letters intact)
+const toCode = () => btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+function fromCode(code) {
+  const s = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+  const ok = s && Array.isArray(s.owned) && s.owned.every(k => typeof k === "string") && s.ch && Number.isFinite(+s.ch.n);
+  if (!ok) throw new Error("bad code");
+  return { owned: s.owned, ch: { n: +s.ch.n, letter: s.ch.letter === "A" || s.ch.letter === "B" ? s.ch.letter : "", part: +s.ch.part || 0 },
+    heroes: (s.heroes || []).filter(h => HEROES.includes(h)), onMap: (s.onMap || []).map(Number).filter(Number.isFinite), sample: false };
+}
+// link with the state in its #hash
+const PAGE_URL = location.origin + location.pathname;
+document.getElementById("copyLink").onclick = () => {
+  const msg = document.getElementById("linkMsg"), code = encodeState(DATA, state), url = PAGE_URL + "#" + code;
+  try { history.replaceState(null, "", "#" + code); } catch (e) {}
+  navigator.clipboard.writeText(url).then(() => { msg.textContent = "链接已复制。"; },
+    () => { const box = document.getElementById("code"); box.value = url; box.select(); msg.textContent = "链接在下面的输入框中，已选中以便复制。"; });
+};
+
+// opening a link with a state asks first: it would replace what this browser has saved
+let linked = null;
+function checkLink() {
+  const code = decodeURIComponent(location.hash.slice(1));
+  const banner = document.getElementById("fromLink"), msg = document.getElementById("fromLinkMsg");
+  if (!code) return;
+  if (!code.startsWith("t")) {
+    // diagnostic: show what the viewer actually handed over instead of ignoring it
+    msg.textContent = `链接给页面传入了一个标记“${code.slice(0, 20)}…” (${code.length} 个字符), 它不是游戏状态。`;
+    document.getElementById("linkYes").hidden = true;
+    banner.hidden = false;
+    return;
+  }
+  try {
+    linked = decodeState(DATA, code);
+    if (!state.owned.length) {
+      // nothing ticked here yet, so there is nothing to lose: load straight away
+      state = linked; save(); render();
+      msg.textContent = `已从链接载入状态: ${linked.owned.length} 个勾选, 章节 ${linked.ch.n}${linked.ch.letter}.`;
+      document.getElementById("linkYes").hidden = true;
+      document.getElementById("linkNo").textContent = "OK";
+    } else {
+      msg.textContent = `链接包含一个游戏状态: ${linked.owned.length} 个勾选, 章节 ${linked.ch.n}${linked.ch.letter}. 要用它替换当前状态吗 (${state.owned.length} 个勾选)?`;
+      document.getElementById("linkYes").hidden = false;
+      document.getElementById("linkNo").textContent = "保留我的";
+    }
+  } catch (e) {
+    linked = null;
+    msg.textContent = e.message === "version"
+      ? "此链接来自旧版页面，无法读取。请索取新链接。"
+      : `状态链接已损坏：页面收到 ${code.length} 个字符, 而完整链接约有 115 个。请重新完整复制。`;
+    document.getElementById("linkYes").hidden = true;
+  }
+  banner.hidden = false;
+}
+document.getElementById("linkYes").onclick = () => {
+  if (linked) { state = linked; save(); render(); }
+  document.getElementById("fromLink").hidden = true;
+};
+document.getElementById("linkNo").onclick = () => { document.getElementById("fromLink").hidden = true; };
+window.addEventListener("hashchange", checkLink);
+// the service worker makes the page installable
+if ("serviceWorker" in navigator)
+  navigator.serviceWorker.register("/sw.js").catch(() => {});
+
+document.getElementById("copyCode").onclick = () => {
+  const box = document.getElementById("code"), msg = document.getElementById("copyMsg");
+  box.value = toCode();
+  navigator.clipboard.writeText(box.value).then(() => { msg.textContent = "已复制。"; },
+    () => { box.select(); msg.textContent = "代码在下面的输入框中，已选中以便复制。"; });
+};
+document.getElementById("loadCode").onclick = () => {
+  const msg = document.getElementById("loadMsg");
+  try {
+    state = fromCode(document.getElementById("code").value);
+    save(); render();
+    msg.textContent = "已载入: " + state.owned.length + " 个勾选.";
+  } catch (e) {
+    msg.textContent = "这不是有效的代码。请重新完整复制。";
+  }
+};
+document.getElementById("maplist").onclick = e => {
+  const b = e.target.closest("[data-loc]");
+  if (!b) return;
+  const n = +b.dataset.loc;
+  state.onMap = state.onMap.includes(n) ? state.onMap.filter(x => x !== n) : [...state.onMap, n];
+  save();
+  b.setAttribute("aria-pressed", state.onMap.includes(n));
+  document.getElementById("tabMap").textContent = "地图 (" + state.onMap.length + ")";
+  renderGo();
+};
+document.getElementById("party").onclick = e => {
+  const h = e.target.dataset && e.target.dataset.h;
+  if (!h) return;
+  state.heroes = state.heroes.includes(h) ? state.heroes.filter(x => x !== h) : [...state.heroes, h];
+  save(); render();
+};
+document.getElementById("list").onclick = e => {
+  const k = e.target.dataset && e.target.dataset.k;
+  if (!k) return;
+  const owned = new Set(state.owned);
+  if (e.target.dataset.tally) {
+    const [s, p] = k.split("|");
+    const n = count(owned, s) === +p ? 0 : +p;  // tapping the current tally clears it
+    for (let i = 1; i <= COUNTED_MAX; i++) i <= n ? owned.add(s + "|" + i) : owned.delete(s + "|" + i);
+  } else owned.has(k) ? owned.delete(k) : owned.add(k);
+  state.owned = [...owned];
+  save();
+  for (const b of e.target.parentNode.children) b.setAttribute("aria-pressed", owned.has(b.dataset.k));
+  document.getElementById("tabSt").textContent = "状态 (" + state.owned.length + ")";
+  renderGo();
+};
+render();
+checkLink();
+</script>

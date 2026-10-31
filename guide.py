@@ -1,10 +1,12 @@
-"""Build guide_data.json for the status guide page from statusmap.json.
+"""Build the status guide pages from statusmap.json, one per language.
 
-Usage: python -I -X utf8 guide.py statusmap.json guide_data.json guide.html [LANG]
+Usage: python -I -X utf8 guide.py statusmap.json [LANG ...]
 
-LANG (default pl) is a language code of the app's database; it picks the game texts and the folder lang/<LANG>/
-with the hand-written files (ui.json, summaries.csv, leads_extra.csv). A file that folder lacks is read from lang/pl/,
-except summaries.csv: recaps in another language would not help, so the page is then built without them.
+Each LANG is a language code of the app's database with a folder lang/<LANG>/ of hand-written files (ui.json,
+summaries.csv, leads_extra.csv); without arguments every such language is built. Polish, the default, goes to
+guide.html and guide_data.json, any other language to guide_<LANG>.html and guide_data_<LANG>.json. Every page links
+to all languages with a folder. A file a folder lacks is read from lang/pl/, except summaries.csv: recaps in another
+language would not help, so the page is then built without them.
 A gate is a choice that needs a status (or a chapter, or a character) and can still lead to a status part not yet owned;
 the page shows the open ones. Leads are the game's own "New Lead" lines, keyed to the status parts
 gained right around them, so the page shows those whose thread has not moved on since.
@@ -19,13 +21,21 @@ from pathlib import Path
 d = json.load(open(sys.argv[1], encoding="utf-8"))
 V = {int(k): v for k, v in d["verses"].items()}
 BOOKS = {999, 1001}  # entry books: reached from map locations, never walked to
-LANG = sys.argv[4] if len(sys.argv) > 4 else "pl"
-assert LANG in d["langs"], f"{LANG} is not one of the app's languages: {d['langs']}"
-DEFAULT = "pl"  # the complete folder
+DEFAULT = "pl"  # the complete folder, and the page Netlify serves at /
+ALL = [c for c in d["langs"] if Path("lang", c).is_dir()]
+assert DEFAULT in ALL, ALL
 
 
-def lang_file(name):
-    own = Path("lang", LANG, name)
+def page_name(lang):
+    return "guide.html" if lang == DEFAULT else f"guide_{lang}.html"
+
+
+def data_name(lang):
+    return "guide_data.json" if lang == DEFAULT else f"guide_data_{lang}.json"
+
+
+def lang_file(lang, name):
+    own = Path("lang", lang, name)
     if own.exists() or name == "summaries.csv":
         return own
     print(f"no {own.as_posix()}: using lang/{DEFAULT}/{name}")
@@ -92,73 +102,8 @@ for v in V.values():
     for s, p, *_ in gains_of(v) + [c for ch in v["choices"] for c in ch["conds"]]:
         max_part[s] = max(max_part[s], p or 0)
 
-gates = {}
-for vid, v in V.items():
-    for c in v["choices"]:
-        if not (any(h for *_, h in c["conds"]) or c["chapter"] or c["heroes"]):
-            continue
-        r = {(s, p) for s, p, _ in c["gains"]} | (reach(c["target"]) if c["target"] else set())
-        r = {g for g in r if g[1] is not None}
-        if not r:
-            continue
-        locs = entry_locs(vid)
-        if not locs:
-            continue  # opened from a card (encounter, secret, chapter), not a place the party can walk to
-        g = {
-            "at": f'{v["loc"]}/{v["num"]}', "locs": locs,
-            # a branch label is only its condition, so the page says "visit again" instead
-            "label": re.sub(r"\s*\(.*", "", c["label_" + LANG]).strip() if c["kind"] == "option" else "",
-            "conds": c["conds"], "chapter": [chapter(x) for x in c["chapter"]], "heroes": c["heroes"],
-        }
-        key = json.dumps([g["at"], g["label"], g["conds"], g["chapter"], g["heroes"]])
-        g["reach"] = sorted(r | {tuple(x) for x in gates.get(key, {}).get("reach", [])})  # same choice listed per outcome
-        gates[key] = g
-gates = list(gates.values())
-
-leads = []
-for vid, v in V.items():
-    for t in v["leads"]:
-        if not t[LANG]:
-            continue  # the translation has no "New Lead" line here
-        # gains in the lead's verse, else in the nearest verses leading to it
-        near, frontier, seen = {(s, p) for s, p, _ in gains_of(v)}, [vid], {vid}
-        for _ in range(4):
-            if near:
-                break
-            frontier = [p for x in frontier for p in parents[x] - seen]
-            seen |= set(frontier)
-            near = {(s, p) for x in frontier for s, p, _ in gains_of(V[x])}
-        near = sorted(g for g in near if g[1] is not None)
-        if near:
-            leads.append({"at": f'{v["loc"]}/{v["num"]}', "text": t[LANG], "keys": near})
-
-# leads the automatic keying misses, pinned by hand: shown once "show" is owned, until "hide" is owned
-def part_key(k):
-    st, p = k.split("|")
-    return [st, int(p) if p else None]
-
-
-# a row may also override an automatically keyed lead whose quest ends in another status; ";" separates alternatives
-for r in csv.DictReader(open(lang_file("leads_extra.csv"), encoding="utf-8")):
-    v = next(v for v in V.values() if f'{v["loc"]}/{v["num"]}' == r["at"])
-    # "starts" is Polish; the element it finds gives the text in either language
-    text = next(t for t in v["leads"] if t["pl"].startswith(r["starts"]))[LANG]
-    leads = [l for l in leads if (l["at"], l["text"]) != (r["at"], text)]
-    leads.append({"at": r["at"], "text": text, "keys": [part_key(k) for k in r["show"].split(";")],
-                  "hide": [part_key(k) for k in r["hide"].split(";")]})
-
-# one-line recaps written per status part; an empty text marks a purely mechanical part
-SUMMARIES = lang_file("summaries.csv")
-try:
-    summaries = {f'{r["status"]}|{r["part"]}': r["text"] for r in csv.DictReader(open(SUMMARIES, encoding="utf-8")) if r["text"]}
-except FileNotFoundError:
-    summaries = {}  # the page then has no "what happened" recaps; summary_src.py dumps the texts to write them from
-    print(f"no {SUMMARIES.as_posix()}: building without summaries")
-
-
 # map cards only: the entry books and chapter cards are never laid on the table
 loc_names = {n: name for n, name in d["loc_names"]["pl"].items() if int(n) not in BOOKS and int(n) < 1100}
-shown_names = {n: d["loc_names"][LANG].get(n, nm) for n, nm in loc_names.items()}
 
 
 def name_pattern(name):
@@ -166,22 +111,6 @@ def name_pattern(name):
     words = re.findall(r"\w+", name.split(",")[0])
     return re.compile(r"\b" + r"\s+".join(re.escape(w[:max(4, len(w) - 2)]) + r"\w*" for w in words) + r"\b", re.I)
 
-
-# where each lead is read and where it points, so the page can drop hints about regions no longer on the table
-at_vid = {f'{v["loc"]}/{v["num"]}': vid for vid, v in V.items()}
-place_names = {int(n): name_pattern(nm) for n, nm in shown_names.items()}
-for l in leads:
-    targets = {int(x) for x in re.findall(r"\(\s*(\d{3})\s*\)", l["text"]) if x in loc_names}
-    targets |= {n for n, p in place_names.items() if p.search(l["text"])}
-    l["locs"] = sorted(set(entry_locs(at_vid[l["at"]])) | targets)
-
-# where each summarized part is granted, so the player can reread it in the app (texts stay in the app)
-sources = collections.defaultdict(list)
-for v in V.values():
-    at = f'{v["loc"]}/{v["num"]}'
-    for st, p, _ in v["gains"] + [g for c in v["choices"] for g in c["gains"]]:
-        if f"{st}|{p}" in summaries and at not in sources[f"{st}|{p}"]:
-            sources[f"{st}|{p}"].append(at)
 
 # entries that close a chapter part: they send the party to "Rozdział 7B: Część 3", or end a whole chapter;
 # read from the Polish text, which every database has, and the keys hold no text, so this serves every language
@@ -193,20 +122,112 @@ for v in V.values():
     for k in sorted(keys):  # sets iterate in a per-run order; keep the output byte-stable
         chapter_texts[k].append(f'{v["loc"]}/{v["num"]}')
 
-out = {"names": d["names"].get(LANG, {}), "loc_names": shown_names, "max_part": max_part, "gates": gates, "leads": leads, "summaries": summaries, "sources": sources, "chapter_refs": chapter_texts}
-data = json.dumps(out, ensure_ascii=False, separators=(",", ":"))
-open(sys.argv[2], "w", encoding="utf-8").write(data)
-page = open("guide_template.html", encoding="utf-8").read()
-logic = open("guide_logic.js", encoding="utf-8").read()
-# page strings: {{key}} in the template, from ui.json {key: text}; a key the language lacks comes from the default
-ui = json.load(open(Path("lang", DEFAULT, "ui.json"), encoding="utf-8"))
-own = json.load(open(lang_file("ui.json"), encoding="utf-8"))
-if ui.keys() - own.keys():
-    print(f"page strings missing from lang/{LANG}/ui.json, {DEFAULT} used:", ", ".join(sorted(ui.keys() - own.keys())))
-ui.update(own)
-# the strings land in HTML and in "…", '…' and `…` JavaScript literals unescaped
-bad = {k: t for k, t in ui.items() if re.search(r"[\"'`\\<>]", t)}
-assert not bad, f"lang/{LANG}/ui.json strings must not contain \" ' ` \\ < >: {bad}"
-page = re.sub(r"\{\{(\w+)\}\}", lambda m: ui[m[1]], page)
-open(sys.argv[3], "w", encoding="utf-8").write(page.replace("/*DATA*/", data).replace("/*LOGIC*/", logic))
-print(f"{len(gates)} gates, {len(leads)} of {sum(len(v['leads']) for v in V.values())} leads keyed ({LANG})")
+
+def build(LANG):
+    gates = {}
+    for vid, v in V.items():
+        for c in v["choices"]:
+            if not (any(h for *_, h in c["conds"]) or c["chapter"] or c["heroes"]):
+                continue
+            r = {(s, p) for s, p, _ in c["gains"]} | (reach(c["target"]) if c["target"] else set())
+            r = {g for g in r if g[1] is not None}
+            if not r:
+                continue
+            locs = entry_locs(vid)
+            if not locs:
+                continue  # opened from a card (encounter, secret, chapter), not a place the party can walk to
+            g = {
+                "at": f'{v["loc"]}/{v["num"]}', "locs": locs,
+                # a branch label is only its condition, so the page says "visit again" instead
+                "label": re.sub(r"\s*\(.*", "", c["label_" + LANG]).strip() if c["kind"] == "option" else "",
+                "conds": c["conds"], "chapter": [chapter(x) for x in c["chapter"]], "heroes": c["heroes"],
+            }
+            key = json.dumps([g["at"], g["label"], g["conds"], g["chapter"], g["heroes"]])
+            g["reach"] = sorted(r | {tuple(x) for x in gates.get(key, {}).get("reach", [])})  # same choice listed per outcome
+            gates[key] = g
+    gates = list(gates.values())
+
+    leads = []
+    for vid, v in V.items():
+        for t in v["leads"]:
+            if not t[LANG]:
+                continue  # the translation has no "New Lead" line here
+            # gains in the lead's verse, else in the nearest verses leading to it
+            near, frontier, seen = {(s, p) for s, p, _ in gains_of(v)}, [vid], {vid}
+            for _ in range(4):
+                if near:
+                    break
+                frontier = [p for x in frontier for p in parents[x] - seen]
+                seen |= set(frontier)
+                near = {(s, p) for x in frontier for s, p, _ in gains_of(V[x])}
+            near = sorted(g for g in near if g[1] is not None)
+            if near:
+                leads.append({"at": f'{v["loc"]}/{v["num"]}', "text": t[LANG], "keys": near})
+
+    # leads the automatic keying misses, pinned by hand: shown once "show" is owned, until "hide" is owned
+    def part_key(k):
+        st, p = k.split("|")
+        return [st, int(p) if p else None]
+
+
+    # a row may also override an automatically keyed lead whose quest ends in another status; ";" separates alternatives
+    for r in csv.DictReader(open(lang_file(LANG, "leads_extra.csv"), encoding="utf-8")):
+        v = next(v for v in V.values() if f'{v["loc"]}/{v["num"]}' == r["at"])
+        # "starts" is Polish; the element it finds gives the text in either language
+        text = next(t for t in v["leads"] if t["pl"].startswith(r["starts"]))[LANG]
+        leads = [l for l in leads if (l["at"], l["text"]) != (r["at"], text)]
+        leads.append({"at": r["at"], "text": text, "keys": [part_key(k) for k in r["show"].split(";")],
+                      "hide": [part_key(k) for k in r["hide"].split(";")]})
+
+    # one-line recaps written per status part; an empty text marks a purely mechanical part
+    SUMMARIES = lang_file(LANG, "summaries.csv")
+    try:
+        summaries = {f'{r["status"]}|{r["part"]}': r["text"] for r in csv.DictReader(open(SUMMARIES, encoding="utf-8")) if r["text"]}
+    except FileNotFoundError:
+        summaries = {}  # the page then has no "what happened" recaps; summary_src.py dumps the texts to write them from
+        print(f"no {SUMMARIES.as_posix()}: building without summaries")
+
+
+    shown_names = {n: d["loc_names"][LANG].get(n, nm) for n, nm in loc_names.items()}
+
+    # where each lead is read and where it points, so the page can drop hints about regions no longer on the table
+    at_vid = {f'{v["loc"]}/{v["num"]}': vid for vid, v in V.items()}
+    place_names = {int(n): name_pattern(nm) for n, nm in shown_names.items()}
+    for l in leads:
+        targets = {int(x) for x in re.findall(r"\(\s*(\d{3})\s*\)", l["text"]) if x in loc_names}
+        targets |= {n for n, p in place_names.items() if p.search(l["text"])}
+        l["locs"] = sorted(set(entry_locs(at_vid[l["at"]])) | targets)
+
+    # where each summarized part is granted, so the player can reread it in the app (texts stay in the app)
+    sources = collections.defaultdict(list)
+    for v in V.values():
+        at = f'{v["loc"]}/{v["num"]}'
+        for st, p, _ in v["gains"] + [g for c in v["choices"] for g in c["gains"]]:
+            if f"{st}|{p}" in summaries and at not in sources[f"{st}|{p}"]:
+                sources[f"{st}|{p}"].append(at)
+
+    out = {"names": d["names"].get(LANG, {}), "loc_names": shown_names, "max_part": max_part, "gates": gates, "leads": leads, "summaries": summaries, "sources": sources, "chapter_refs": chapter_texts}
+    data = json.dumps(out, ensure_ascii=False, separators=(",", ":"))
+    open(data_name(LANG), "w", encoding="utf-8").write(data)
+    page = open("guide_template.html", encoding="utf-8").read()
+    logic = open("guide_logic.js", encoding="utf-8").read()
+    # page strings: {{key}} in the template, from ui.json {key: text}; a key the language lacks comes from the default
+    ui = json.load(open(Path("lang", DEFAULT, "ui.json"), encoding="utf-8"))
+    own = json.load(open(lang_file(LANG, "ui.json"), encoding="utf-8"))
+    if ui.keys() - own.keys():
+        print(f"page strings missing from lang/{LANG}/ui.json, {DEFAULT} used:", ", ".join(sorted(ui.keys() - own.keys())))
+    ui.update(own)
+    # the strings land in HTML and in "…", '…' and `…` JavaScript literals unescaped
+    bad = {k: t for k, t in ui.items() if re.search(r"[\"'`\\<>]", t)}
+    assert not bad, f"lang/{LANG}/ui.json strings must not contain \" ' ` \\ < >: {bad}"
+    # the language switch: every language's own name, linking to its page
+    ui["lang_options"] = "".join(f'<option value="{page_name(c)}"{" selected" if c == LANG else ""}>{NAMES[c]}</option>' for c in ALL)
+    page = re.sub(r"\{\{(\w+)\}\}", lambda m: ui[m[1]], page)
+    open(page_name(LANG), "w", encoding="utf-8").write(page.replace("/*DATA*/", data).replace("/*LOGIC*/", logic))
+    print(f"{len(gates)} gates, {len(leads)} of {sum(len(v['leads']) for v in V.values())} leads keyed ({LANG})")
+
+
+NAMES = {c: json.load(open(lang_file(c, "ui.json"), encoding="utf-8"))["lang_name"] for c in ALL}
+for lang in sys.argv[2:] or ALL:
+    assert lang in ALL, f"{lang} has no lang/{lang}/ folder or no text in the database; languages: {ALL}"
+    build(lang)

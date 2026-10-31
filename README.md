@@ -4,14 +4,14 @@ A spoiler-free companion page for the Kings of Ruin campaign of Tainted Grail. Y
 paper campaign sheet, and the page shows what has happened so far and where to go next. The Polish build is online
 at https://tropy-krolow-ruin.netlify.app
 
-The ready Polish page is `guide.html`; it also works opened straight from disk. Rebuilding it, or building it in
-another language, needs the game's text database, which is not in the repo because it is the game's protected
+The ready pages are `guide.html` (Polish) and `guide_<code>.html` for the other languages, linked by a language
+switch in the header; they also work opened straight from disk. Rebuilding them needs the game's text database, which is not in the repo because it is the game's protected
 content.
 
 ## Getting the game database
 
 The only missing file is `appData.sqlite` (about 75 MB), the text database of the official Tainted Grail Companion
-app (`com.AwakenRealms.TaintedGrail`). `statusmap.json` and `guide_data.json` are built from it.
+app (`com.AwakenRealms.TaintedGrail`). `statusmap.json` and the `guide_data*.json` files are built from it.
 
 1. Install the app on an Android phone and open it once so it downloads the campaign content.
 2. Turn on USB debugging (Developer options) and connect the phone to the computer.
@@ -32,16 +32,20 @@ Needs Python 3 (standard library only) and Node.js for the tests:
 
 ```
 python -I -X utf8 statusmap.py appData.sqlite statusmap.json
-python -I -X utf8 guide.py statusmap.json guide_data.json guide.html
+python -I -X utf8 guide.py statusmap.json
 node guide_test.js guide_data.json
 ```
 
+`guide.py` builds every language that has a `lang/<code>/` folder: Polish into `guide.html` and
+`guide_data.json`, the others into `guide_<code>.html` and `guide_data_<code>.json` (test those the same way).
+Every page's switch lists all of them.
+
 ## Building in another language
 
-The last argument of `guide.py` picks the page language; the default is `pl`:
+To rebuild only some languages, name them after `statusmap.json`:
 
 ```
-python -I -X utf8 guide.py statusmap.json guide_data.json guide.html en
+python -I -X utf8 guide.py statusmap.json en de
 ```
 
 The language code is the one the app's database uses. The campaign is translated into `en`, `pl`, `fr`, `es`,
@@ -73,6 +77,6 @@ complete default, except `summaries.csv` (see below). Each part of the page come
 - **Pinned hints** (`leads_extra.csv`, hints shown from and hidden by hand-picked statuses) work for every language
   from `lang/pl/`: a row finds the hint by the start of its Polish text and shows it in the chosen language.
 
-The build has no step for publishing; host the resulting `guide.html` wherever you like.
+The build has no step for publishing; host the resulting `guide*.html` files together wherever you like.
 
 Further details and the project's rules are in `CLAUDE.md`.

@@ -31,6 +31,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
   padding-block: 10px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
 h1 { font: 700 1.5rem/1.1 var(--display); margin: 0; letter-spacing: .02em; text-wrap: balance; }
+.top { justify-content: space-between; }
 h2 { font: 500 1.1rem/1.2 var(--display); margin: 0; color: var(--muted); letter-spacing: .04em; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 label.ch { font-size: .9rem; color: var(--muted); display: flex; gap: 6px; align-items: center; }
@@ -77,7 +78,7 @@ details.older[open] > details.thread { margin-top: 8px; }
 
 <div class="wrap">
   <header>
-    <h1>Tropy Królów Ruin</h1>
+    <div class="row top"><h1>Tropy Królów Ruin</h1><select id="lang" aria-label="Język"><option value="guide_en.html">English</option><option value="guide.html" selected>Polski</option><option value="guide_fr.html">Français</option><option value="guide_es.html">Español</option><option value="guide_de.html">Deutsch</option><option value="guide_it.html">Italiano</option><option value="guide_ru.html">Русский</option><option value="guide_cn.html">中文</option></select></div>
     <div class="row">
       <label class="ch">Rozdział <select id="chN"></select></label>
       <label class="ch">ścieżka <select id="chL"><option value="">–</option><option>A</option><option>B</option></select></label>
@@ -411,6 +412,10 @@ for (const [id, f] of [["chN", "n"], ["chL", "letter"], ["chP", "part"]])
     save(); render();
   };
 document.getElementById("q").oninput = renderSheet;
+// each language is its own page; the saved state is shared, so the switch keeps it
+const langSel = document.getElementById("lang");
+langSel.hidden = langSel.options.length < 2;
+langSel.onchange = () => { location.href = langSel.value; };
 
 // state <-> text code (base64 of the JSON; encodeURIComponent keeps Polish letters intact)
 const toCode = () => btoa(unescape(encodeURIComponent(JSON.stringify(state))));
