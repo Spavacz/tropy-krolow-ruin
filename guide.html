@@ -23,6 +23,8 @@
 :root[data-theme="dark"] {
   --bg: #121715; --panel: #1a211e; --fg: #e3e8e0; --muted: #98a59c; --line: #2c3631;
   --accent: #74b8a1; --on-accent: #0e1412; --lead: #e0c27c; --lead-bg: #2a2416; color-scheme: dark }
+/* author display rules (.banner is flex) beat the browser's own [hidden]; the claude.ai frame used to add this */
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--fg); font: 16px/1.45 var(--body);
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
