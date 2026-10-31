@@ -1,6 +1,6 @@
 """Build statusmap.json: the Kings of Ruin verse graph with every status gain and status condition.
 
-Usage: python -I -X utf8 statusmap.py pulled statusmap.json
+Usage: python -I -X utf8 statusmap.py appData.sqlite statusmap.json
 
 English text is parsed (its wording is regular); Polish labels and status names ride along by element.
 """
@@ -13,8 +13,8 @@ from pathlib import Path
 
 CAMP, EN, PL = 26, 1, 2
 
-src, out = Path(sys.argv[1]), Path(sys.argv[2])
-con = sqlite3.connect(f"file:{src / 'appData.sqlite'}?mode=ro", uri=True)
+db, out = Path(sys.argv[1]), Path(sys.argv[2])
+con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
 
 
 def clean(t):

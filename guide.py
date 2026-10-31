@@ -165,7 +165,7 @@ for v in V.values():
     text = "\n\n".join([v["text_pl"]] + [c["result_pl"] for c in v["choices"] if c["result_pl"]])
     keys = {f"{a}:{b}" for a, b in re.findall(r"kart[eęy]\s+Rozdział\w*\s+(\d+[AB]?)\s*:\s*Część\s*(\d+)", text)}
     keys |= {f"END {a}" for a in re.findall(r"ukończyć Rozdział\s+(\d+[AB]?)", text)}
-    for k in keys:
+    for k in sorted(keys):  # sets iterate in a per-run order; keep the output byte-stable
         chapter_texts[k].append(f'{v["loc"]}/{v["num"]}')
 
 out = {"names": d["names_pl"], "loc_names": loc_names, "max_part": max_part, "gates": gates, "leads": leads, "summaries": summaries, "sources": sources, "chapter_refs": chapter_texts}

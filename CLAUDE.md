@@ -10,10 +10,12 @@ z których korzysta też ta strona.
 
 ## Dane źródłowe (nie są w repo)
 
-Wejściem jest `appData.sqlite` z aplikacji (wszystkie teksty gry), ściągnięty do `C:\Workspace\tgrail\pulled`.
-Opis, jak go odtworzyć, jest w `C:\Workspace\tgrail\CLAUDE.md`. Treść gry jest chroniona, dlatego pliki
-z pełnym tekstem (`statusmap.json`, `guide_data.json`) są w `.gitignore`, a w repo jest tylko gotowy
-`guide.html` (krótkie cytaty, streszczenia, numery wpisów).
+Jedynym wejściem jest `appData.sqlite` z aplikacji (75 MB, wszystkie teksty gry). Leży w katalogu repo,
+ale jest w `.gitignore`. To kopia `C:\Workspace\tgrail\pulled\appData.sqlite`: ściągnięcie z telefonu
+opisuje `C:\Workspace\tgrail\CLAUDE.md`. Nagrania nie są tu potrzebne. Treść gry jest chroniona, dlatego
+baza i pliki z pełnym tekstem (`statusmap.json`, `guide_data.json`) są w `.gitignore`, a w repo jest tylko
+gotowy `guide.html` (krótkie cytaty, streszczenia, numery wpisów). Generowanie jest deterministyczne:
+przebudowa z tej samej bazy daje identyczny `guide.html`.
 
 Schemat bazy, który się przydaje: `Location` (`_campId=26`, `displayNumber`), `Verse` (wersy lokacji),
 `VerseElements` (typ: 0 narracja, 1 warunek, 2 opcja, -1 warunek automatyczny), `ElemetText` (sic),
@@ -27,7 +29,7 @@ Tajemnic** (KT): 999 to wpisy 0–600, 1001 to wpisy 601–1263; „999/503” w
 Skrypty używają tylko biblioteki standardowej Pythona. Testy wymagają `node`.
 
 ```
-python -I -X utf8 statusmap.py ../tgrail/pulled statusmap.json
+python -I -X utf8 statusmap.py appData.sqlite statusmap.json
 python -I -X utf8 guide.py statusmap.json guide_data.json guide.html
 node guide_test.js guide_data.json
 ```
