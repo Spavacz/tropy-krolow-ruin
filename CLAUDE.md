@@ -11,8 +11,11 @@ z których korzysta też ta strona.
 ## Dane źródłowe (nie są w repo)
 
 Jedynym wejściem jest `appData.sqlite` z aplikacji (75 MB, wszystkie teksty gry). Leży w katalogu repo,
-ale jest w `.gitignore`. To kopia `C:\Workspace\tgrail\pulled\appData.sqlite`: ściągnięcie z telefonu
-opisuje `C:\Workspace\tgrail\CLAUDE.md`. Nagrania nie są tu potrzebne. Treść gry jest chroniona, dlatego
+ale jest w `.gitignore`. Na telefonie leży w
+`/sdcard/Android/data/com.AwakenRealms.TaintedGrail/files/AppContent/appData.sqlite`, a `README.md` opisuje
+krok po kroku, jak ją pobrać (adb, `MSYS_NO_PATHCONV=1` w Git Bash). adb jest w
+`/c/Users/spavm/AppData/Local/Microsoft/WinGet/Packages/Google.PlatformTools_*/platform-tools/` i nie jest
+na PATH. Nagrania nie są tu potrzebne. Treść gry jest chroniona, dlatego
 baza i pliki z pełnym tekstem (`statusmap.json`, `guide_data.json`) są w `.gitignore`, a w repo jest tylko
 gotowy `guide.html` (krótkie cytaty, streszczenia, numery wpisów). Generowanie jest deterministyczne:
 przebudowa z tej samej bazy daje identyczny `guide.html`.
