@@ -14,8 +14,10 @@ assert(L.chapterOk(ch, [4, 10, "", 0, false]));
 const owned = new Set(["Chance Meetings|3", "Venedian Path|2"]);
 const party = new Set(["Osbert"]);
 const open = L.openGates(data, owned, ch, party);
-assert(open.some(g => g.at === "132/1" && g.label.startsWith("1 Zatrudnij")), "132 woodcarvers gate");
-assert(!L.openGates(data, new Set(), ch, party).some(g => g.at === "132/1" && g.label.includes("Zatrudnij")));
+// matched by place and condition, not by label, so the test holds for every build language
+const hire = g => g.at === "132/1" && g.conds.some(c => c[0] === "Chance Meetings" && c[1] === 3);
+assert(open.some(hire), "132 woodcarvers gate");
+assert(!L.openGates(data, new Set(), ch, party).some(hire));
 const withHero = data.gates.find(g => g.heroes.length === 1 && g.heroes[0] === "Elgan" && !g.conds.length && !g.chapter.length);
 assert(L.openGates(data, new Set(), ch, new Set(["Elgan"])).includes(withHero), "Elgan gate open for Elgan");
 assert(!L.openGates(data, new Set(), ch, party).includes(withHero), "Elgan gate closed without Elgan");
@@ -27,12 +29,12 @@ assert(!L.condOk(new Set(["Family Secrets|1"]), ch, ["Family Secrets", null, tru
 assert(L.condOk(new Set(["Mapping the Bog|1", "Mapping the Bog|2", "Mapping the Bog|3"]), ch, ["Mapping the Bog", null, true, 3]));
 
 // hand-pinned lead: the Caprellida hint shows after Rumors 5 and goes away with Faint Notion 8
-const capr = l => l.text.startsWith("Możesz spotkać Caprellidę");
+const capr = l => l.at === "155/9" && l.hide;
 assert(L.activeLeads(data, new Set(["Rumors & Hearsay|5"])).some(capr));
 assert(!L.activeLeads(data, new Set(["Rumors & Hearsay|5", "Faint Notion|8"])).some(capr));
 
 // the senator's map quest ends with Friend of Nobility 3 (map to Culpean) or Informer 5 (map to Octavia)
-const map = l => l.text.startsWith("fomoriański senator chce");
+const map = l => l.at === "155/8" && l.hide;
 assert(L.activeLeads(data, new Set(["Bureaucracy|3"])).some(map));
 assert(!L.activeLeads(data, new Set(["Bureaucracy|3", "Friend of Nobility|3"])).some(map));
 

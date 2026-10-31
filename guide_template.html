@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="pl">
+<html lang="{{lang}}">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2f6b5a">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
-<title>Tropy Królów Ruin</title>
+<title>{{title}}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
 <style>
@@ -77,23 +77,23 @@ details.older[open] > details.thread { margin-top: 8px; }
 
 <div class="wrap">
   <header>
-    <h1>Tropy Królów Ruin</h1>
+    <h1>{{title}}</h1>
     <div class="row">
-      <label class="ch">Rozdział <select id="chN"></select></label>
-      <label class="ch">ścieżka <select id="chL"><option value="">–</option><option>A</option><option>B</option></select></label>
-      <label class="ch">część <select id="chP"><option value="0">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+      <label class="ch">{{chapter}} <select id="chN"></select></label>
+      <label class="ch">{{path}} <select id="chL"><option value="">–</option><option>A</option><option>B</option></select></label>
+      <label class="ch">{{part_word}} <select id="chP"><option value="0">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
     </div>
-    <div class="row" id="party" aria-label="Postaci w drużynie"></div>
+    <div class="row" id="party" aria-label="{{party_aria}}"></div>
     <div class="tabs" role="tablist">
-      <button id="tabGo" role="tab" aria-selected="true">Dokąd iść</button>
-      <button id="tabSt" role="tab" aria-selected="false">Statusy</button>
-      <button id="tabMap" role="tab" aria-selected="false">Mapa</button>
+      <button id="tabGo" role="tab" aria-selected="true">{{tab_go}}</button>
+      <button id="tabSt" role="tab" aria-selected="false">{{statuses}}</button>
+      <button id="tabMap" role="tab" aria-selected="false">{{map}}</button>
     </div>
   </header>
 
   <div id="fromLink" class="banner" hidden>
     <span id="fromLinkMsg"></span>
-    <span class="row"><button class="btn" id="linkYes">Wczytaj</button><button class="btn" id="linkNo">Zostaw moje</button></span>
+    <span class="row"><button class="btn" id="linkYes">{{load}}</button><button class="btn" id="linkNo">{{keep_mine}}</button></span>
   </div>
 
 
@@ -104,32 +104,31 @@ details.older[open] > details.thread { margin-top: 8px; }
     <section id="gates"></section>
     <section id="heroGates"></section>
     <section id="chapterGates"></section>
-    <p class="note" id="mapNote">Pokazuję wszystkie lokacje. W zakładce Mapa możesz zaznaczyć te, które leżą na stole.</p>
+    <p class="note" id="mapNote">{{map_note}}</p>
   </main>
 
   <main id="map" hidden>
-    <p class="note">Zaznacz lokacje, które leżą teraz na stole. Rady pokażą tylko je. Bez zaznaczeń widać wszystkie.</p>
+    <p class="note">{{map_help}}</p>
     <div class="maplist" id="maplist"></div>
   </main>
 
   <main id="sheet" hidden>
-    <input type="search" id="q" placeholder="Szukaj statusu…" aria-label="Szukaj statusu">
+    <input type="search" id="q" placeholder="{{search}}…" aria-label="{{search}}">
     <div id="list"></div>
-    <p class="note">Statusy bez numerowanych części (np. Upływ Czasu, Dług) zaznaczasz liczbą: ile ich masz.</p>
+    <p class="note">{{tally_note}}</p>
     <section class="transfer" aria-labelledby="trH">
-      <h2 id="trH">Przenieś na inne urządzenie</h2>
-      <p class="note">Kod zawiera statusy, rozdział, drużynę i mapę. Skopiuj go tutaj i wklej na drugim urządzeniu.</p>
-      <div class="row"><button class="btn" id="copyLink">Kopiuj link ze stanem</button><span class="note" id="linkMsg" role="status"></span></div>
-      <p class="note">Link otwiera tę stronę z Twoimi statusami. Starszy sposób, długi kod, działa dalej:</p>
-      <div class="row"><button class="btn" id="copyCode">Kopiuj kod</button><span class="note" id="copyMsg" role="status"></span></div>
-      <textarea id="code" rows="3" aria-label="Kod stanu"></textarea>
-      <div class="row"><button class="btn" id="loadCode">Wczytaj wklejony kod</button><span class="note" id="loadMsg" role="status"></span></div>
+      <h2 id="trH">{{transfer}}</h2>
+      <p class="note">{{transfer_note}}</p>
+      <div class="row"><button class="btn" id="copyLink">{{copy_link}}</button><span class="note" id="linkMsg" role="status"></span></div>
+      <p class="note">{{link_note}}</p>
+      <div class="row"><button class="btn" id="copyCode">{{copy_code}}</button><span class="note" id="copyMsg" role="status"></span></div>
+      <textarea id="code" rows="3" aria-label="{{code_aria}}"></textarea>
+      <div class="row"><button class="btn" id="loadCode">{{load_code}}</button><span class="note" id="loadMsg" role="status"></span></div>
     </section>
   </main>
 
   <footer class="note" style="border-top: 1px solid var(--line); padding-top: 12px">
-    Nieoficjalna strona fanowska, niezwiązana z Awaken Realms. Tainted Grail jest znakiem towarowym Awaken Realms.
-    Strona podaje numery wpisów i własne streszczenia, a do grania potrzebna jest gra i aplikacja Companion.
+    {{footer}}
   </footer>
 </div>
 
@@ -139,8 +138,8 @@ const DATA = /*DATA*/;
 const KEY = "tropy-kr-v1";
 const COUNTED_MAX = 6;
 
-const name = s => DATA.names[s] || s.replace(/^Time Passes: Chapter (.+)$/, "Upływ Czasu (Rozdział $1)");
-const part = p => p == null ? "" : " cz. " + p;
+const name = s => DATA.names[s] || s.replace(/^Time Passes: Chapter (.+)$/, "{{time_passes}}");
+const part = p => p == null ? "" : " {{part_short}} " + p;
 const esc = t => t.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
 
 const HEROES = ["Elgan", "Gerdwyn", "Iunis", "Osbert"];
@@ -156,21 +155,21 @@ const chN = document.getElementById("chN");
 for (let i = 1; i <= 10; i++) chN.add(new Option(i, i));
 
 function chapterText([a, b, letter, p, further]) {
-  return "Rozdział " + a + (b !== a ? "–" + b : "") + letter + (p ? ", część " + p : "") + (further ? " lub dalej" : "");
+  return "{{chapter}} " + a + (b !== a ? "–" + b : "") + letter + (p ? ", {{part_word}} " + p : "") + (further ? " {{or_later}}" : "");
 }
 
 function place(g) {
   const [loc, verse] = g.at.split("/");
-  return g.locs.length ? g.locs : ["KT wpis " + verse];
+  return g.locs.length ? g.locs : ["{{book_entry}} " + verse];
 }
 
 // where to reread a passage in the companion app; the page keeps only the numbers
 const ref = at => {
   const [loc, verse] = at.split("/");
   // the app splits the Book of Secrets into two pseudo-locations, 999 (entries 0-600) and 1001 (601-1263)
-  return loc === "999" || loc === "1001" ? "KT wpis " + verse : `lokacja ${loc}, wers ${verse}`;
+  return loc === "999" || loc === "1001" ? "{{book_entry}} " + verse : `{{location}} ${loc}, {{verse}} ${verse}`;
 };
-const refs = ats => ats && ats.length ? `<p class="note">Tekst w aplikacji: ${ats.slice(0, 3).map(ref).join(" lub ")}</p>` : "";
+const refs = ats => ats && ats.length ? `<p class="note">{{in_app}}: ${ats.slice(0, 3).map(ref).join(" {{or}} ")}</p>` : "";
 
 // the passage that sent the party into the current chapter part, or closed the previous chapter
 function previousPart({ n, letter, part }) {
@@ -184,13 +183,13 @@ function renderChapterIntro() {
   const found = previousPart(state.ch);
   const el = document.getElementById("chapterIntro");
   if (!found) {
-    el.innerHTML = `<p class="note">Nie znam wpisu, który zamknął poprzednią część. Ustaw rozdział i część w nagłówku.</p>`;
+    el.innerHTML = `<p class="note">{{no_intro}}</p>`;
     return;
   }
   const [k, ats] = found;
-  const title = k.startsWith("END") ? "Zakończenie rozdziału " + k.slice(4) : "Początek części " + k.replace(":", ", część ");
+  const title = k.startsWith("END") ? "{{chapter_end}} " + k.slice(4) : "{{part_start}} " + k.replace(":", ", {{part_word}} ");
   // a part can be reached from several branches; every entry is listed, the player knows which one they read
-  el.innerHTML = `<p class="note">${esc(title)}: ${ats.map(ref).join(" lub ")}</p>`;
+  el.innerHTML = `<p class="note">${esc(title)}: ${ats.map(ref).join(" {{or}} ")}</p>`;
 }
 
 function renderStory(owned, relevant) {
@@ -201,18 +200,18 @@ function renderStory(owned, relevant) {
     if (DATA.summaries[k]) (parts[s] = parts[s] || []).push(+p);
   }
   const threads = Object.entries(parts).map(([s, ps]) => [s, ps.sort((a, b) => a - b)])
-    .sort((a, b) => name(a[0]).localeCompare(name(b[0]), "pl"));
+    .sort((a, b) => name(a[0]).localeCompare(name(b[0]), "{{lang}}"));
   const html = ([s, ps]) => {
     const top = ps[ps.length - 1];
     const earlier = ps.slice(0, -1).map(p => `<li value="${p}">${esc(DATA.summaries[s + "|" + p])}</li>`).join("");
-    return `<details class="thread"><summary><b>${esc(name(s))} <span class="num">cz. ${top}</span></b>${esc(DATA.summaries[s + "|" + top])}</summary>${refs(DATA.sources[s + "|" + top])}${earlier ? "<ol>" + earlier + "</ol>" : ""}</details>`;
+    return `<details class="thread"><summary><b>${esc(name(s))} <span class="num">{{part_short}} ${top}</span></b>${esc(DATA.summaries[s + "|" + top])}</summary>${refs(DATA.sources[s + "|" + top])}${earlier ? "<ol>" + earlier + "</ol>" : ""}</details>`;
   };
   // threads that open something on the table or hold a live hint come first; the rest fold away
   const now = threads.filter(([s]) => relevant.has(s)), older = threads.filter(([s]) => !relevant.has(s));
   document.getElementById("story").innerHTML = threads.length
-    ? "<h2>Co się działo</h2>" +
-      (now.length ? now.map(html).join("") : `<p class="note">Żaden wątek nie otwiera teraz nic na Twojej mapie.</p>`) +
-      (older.length ? `<details class="older"><summary>Starsze wątki (${older.length})</summary>${older.map(html).join("")}</details>` : "")
+    ? "<h2>{{story}}</h2>" +
+      (now.length ? now.map(html).join("") : `<p class="note">{{no_threads}}</p>`) +
+      (older.length ? `<details class="older"><summary>{{older}} (${older.length})</summary>${older.map(html).join("")}</details>` : "")
     : "";
 }
 
@@ -223,7 +222,7 @@ function renderGo() {
   const onTable = locs => !state.onMap.length || !locs.length || locs.some(p => state.onMap.includes(p));
   const leads = activeLeads(DATA, owned).filter(l => onTable(l.locs));
   document.getElementById("leads").innerHTML = leads.length
-    ? "<h2>Wskazówki z gry</h2>" + leads.map(l =>
+    ? "<h2>{{leads}}</h2>" + leads.map(l =>
         `<div class="lead">${esc(l.text)}<small>${ref(l.at)}</small></div>`).join("")
     : "";
 
@@ -233,12 +232,12 @@ function renderGo() {
       if (!m.has(p)) m.set(p, []);
       m.get(p).push(g);
     }
-    return [...m].sort((a, b) => b[1].length - a[1].length || String(a[0]).localeCompare(String(b[0]), "pl", { numeric: true }));
+    return [...m].sort((a, b) => b[1].length - a[1].length || String(a[0]).localeCompare(String(b[0]), "{{lang}}", { numeric: true }));
   };
   const item = g => {
-    const why = g.conds.filter(c => c[2]).map(([s, p]) => "masz " + name(s) + part(p))
-      .concat(g.heroes.length ? ["dla: " + g.heroes.join(" lub ")] : [], g.chapter.map(chapterText));
-    const what = g.label ? esc(g.label.replace(/^\d+\s+/, "")) : "Wróć tutaj, czeka coś nowego";
+    const why = g.conds.filter(c => c[2]).map(([s, p]) => "{{you_have}} " + name(s) + part(p))
+      .concat(g.heroes.length ? ["{{for}}: " + g.heroes.join(" {{or}} ")] : [], g.chapter.map(chapterText));
+    const what = g.label ? esc(g.label.replace(/^\d+\s+/, "")) : "{{come_back}}";
     return `<li>${what}<div class="why">${esc(why.join(" · "))}</div></li>`;
   };
   const card = ([p, gs]) => {
@@ -256,11 +255,11 @@ function renderGo() {
   const byHero = open.filter(g => !g.conds.some(c => c[2]) && g.heroes.length);
   const byChapter = open.filter(g => !g.conds.some(c => c[2]) && !g.heroes.length);
   document.getElementById("heroGates").innerHTML = shown(byHero).length
-    ? `<h2>Dla Twoich postaci</h2>` + shown(byHero).map(card).join("") : "";
-  document.getElementById("gates").innerHTML = "<h2>Odblokowane przez Twoje statusy</h2>" +
-    (shown(byStatus).length ? shown(byStatus).map(card).join("") : `<p class="note">Żaden z zaznaczonych statusów nie otwiera teraz nic nowego.</p>`);
+    ? `<h2>{{for_heroes}}</h2>` + shown(byHero).map(card).join("") : "";
+  document.getElementById("gates").innerHTML = "<h2>{{by_status}}</h2>" +
+    (shown(byStatus).length ? shown(byStatus).map(card).join("") : `<p class="note">{{no_gates}}</p>`);
   document.getElementById("chapterGates").innerHTML = shown(byChapter).length
-    ? `<h2>Nowe w tym rozdziale</h2>` + shown(byChapter).map(card).join("") : "";
+    ? `<h2>{{by_chapter}}</h2>` + shown(byChapter).map(card).join("") : "";
   document.getElementById("mapNote").hidden = state.onMap.length > 0;
 
   const relevant = new Set(leads.flatMap(l => l.keys.map(k => k[0])));
@@ -272,13 +271,13 @@ function renderSheet() {
   const owned = new Set(state.owned);
   const q = document.getElementById("q").value.trim().toLowerCase();
   const all = Object.keys(DATA.max_part).filter(s => s !== "Time Passes")
-    .sort((a, b) => name(a).localeCompare(name(b), "pl"));
+    .sort((a, b) => name(a).localeCompare(name(b), "{{lang}}"));
   document.getElementById("list").innerHTML = all.filter(s => !q || name(s).toLowerCase().includes(q)).map(s => {
     const n = DATA.max_part[s];
     // a status without numbered parts is a tally: tapping 3 means "I hold three"
     const tally = !n;
     const parts = Array.from({ length: n || COUNTED_MAX }, (_, i) => i + 1);
-    return `<div class="st"><b>${esc(name(s))}</b>${tally ? '<span class="note">ile masz</span>' : ""}<div class="chips">${parts.map(p =>
+    return `<div class="st"><b>${esc(name(s))}</b>${tally ? '<span class="note">{{how_many}}</span>' : ""}<div class="chips">${parts.map(p =>
       `<button class="chip" data-k="${esc(s + "|" + p)}"${tally ? ' data-tally="1"' : ""} aria-pressed="${owned.has(s + "|" + p)}">${p}</button>`).join("")}</div></div>`;
   }).join("");
 }
@@ -287,10 +286,10 @@ function render() {
   chN.value = state.ch.n;
   document.getElementById("chL").value = state.ch.letter;
   document.getElementById("chP").value = state.ch.part;
-  document.getElementById("party").innerHTML = '<span class="ch">Drużyna</span>' + HEROES.map(h =>
+  document.getElementById("party").innerHTML = '<span class="ch">{{party}}</span>' + HEROES.map(h =>
     `<button class="chip" data-h="${h}" aria-pressed="${state.heroes.includes(h)}">${h}</button>`).join("");
-  document.getElementById("tabSt").textContent = "Statusy (" + state.owned.length + ")";
-  document.getElementById("tabMap").textContent = "Mapa (" + state.onMap.length + ")";
+  document.getElementById("tabSt").textContent = "{{statuses}} (" + state.owned.length + ")";
+  document.getElementById("tabMap").textContent = "{{map}} (" + state.onMap.length + ")";
   document.getElementById("maplist").innerHTML = Object.entries(DATA.loc_names).map(([n, nm]) =>
     `<button class="chip" data-loc="${n}" aria-pressed="${state.onMap.includes(+n)}"><b class="num">${n}</b><span>${esc(nm)}</span></button>`).join("");
   renderGo();
@@ -328,8 +327,8 @@ const PAGE_URL = location.origin + location.pathname;
 document.getElementById("copyLink").onclick = () => {
   const msg = document.getElementById("linkMsg"), code = encodeState(DATA, state), url = PAGE_URL + "#" + code;
   try { history.replaceState(null, "", "#" + code); } catch (e) {}
-  navigator.clipboard.writeText(url).then(() => { msg.textContent = "Skopiowano link."; },
-    () => { const box = document.getElementById("code"); box.value = url; box.select(); msg.textContent = "Link jest w polu poniżej, zaznaczony do skopiowania."; });
+  navigator.clipboard.writeText(url).then(() => { msg.textContent = "{{copied_link}}"; },
+    () => { const box = document.getElementById("code"); box.value = url; box.select(); msg.textContent = "{{link_in_box}}"; });
 };
 
 // opening a link with a state asks first: it would replace what this browser has saved
@@ -340,7 +339,7 @@ function checkLink() {
   if (!code) return;
   if (!code.startsWith("t")) {
     // diagnostic: show what the viewer actually handed over instead of ignoring it
-    msg.textContent = `Strona dostała z linku znacznik „${code.slice(0, 20)}…” (${code.length} znaków), który nie jest stanem gry.`;
+    msg.textContent = `{{link_tag}}${code.slice(0, 20)}…” (${code.length} {{chars}}), {{not_state}}`;
     document.getElementById("linkYes").hidden = true;
     banner.hidden = false;
     return;
@@ -350,19 +349,19 @@ function checkLink() {
     if (!state.owned.length) {
       // nothing ticked here yet, so there is nothing to lose: load straight away
       state = linked; save(); render();
-      msg.textContent = `Wczytano stan z linku: ${linked.owned.length} zaznaczeń, rozdział ${linked.ch.n}${linked.ch.letter}.`;
+      msg.textContent = `{{loaded_link}}: ${linked.owned.length} {{marks}}, {{chapter_lc}} ${linked.ch.n}${linked.ch.letter}.`;
       document.getElementById("linkYes").hidden = true;
       document.getElementById("linkNo").textContent = "OK";
     } else {
-      msg.textContent = `Link zawiera stan gry: ${linked.owned.length} zaznaczeń, rozdział ${linked.ch.n}${linked.ch.letter}. Wczytać go zamiast obecnego (${state.owned.length} zaznaczeń)?`;
+      msg.textContent = `{{link_has}}: ${linked.owned.length} {{marks}}, {{chapter_lc}} ${linked.ch.n}${linked.ch.letter}. {{load_instead}} (${state.owned.length} {{marks}})?`;
       document.getElementById("linkYes").hidden = false;
-      document.getElementById("linkNo").textContent = "Zostaw moje";
+      document.getElementById("linkNo").textContent = "{{keep_mine}}";
     }
   } catch (e) {
     linked = null;
     msg.textContent = e.message === "version"
-      ? "Ten link pochodzi ze starszej wersji strony i nie da się go odczytać. Poproś o nowy link."
-      : `Link ze stanem jest uszkodzony: strona dostała ${code.length} znaków, a pełny link ma ok. 115. Skopiuj go jeszcze raz w całości.`;
+      ? "{{old_link}}"
+      : `{{broken_link}} ${code.length} {{chars}}, {{full_link}}`;
     document.getElementById("linkYes").hidden = true;
   }
   banner.hidden = false;
@@ -380,17 +379,17 @@ if ("serviceWorker" in navigator)
 document.getElementById("copyCode").onclick = () => {
   const box = document.getElementById("code"), msg = document.getElementById("copyMsg");
   box.value = toCode();
-  navigator.clipboard.writeText(box.value).then(() => { msg.textContent = "Skopiowano."; },
-    () => { box.select(); msg.textContent = "Kod jest w polu poniżej, zaznaczony do skopiowania."; });
+  navigator.clipboard.writeText(box.value).then(() => { msg.textContent = "{{copied}}"; },
+    () => { box.select(); msg.textContent = "{{code_in_box}}"; });
 };
 document.getElementById("loadCode").onclick = () => {
   const msg = document.getElementById("loadMsg");
   try {
     state = fromCode(document.getElementById("code").value);
     save(); render();
-    msg.textContent = "Wczytano: " + state.owned.length + " zaznaczeń.";
+    msg.textContent = "{{loaded}}: " + state.owned.length + " {{marks}}.";
   } catch (e) {
-    msg.textContent = "To nie jest poprawny kod. Skopiuj go jeszcze raz w całości.";
+    msg.textContent = "{{bad_code}}";
   }
 };
 document.getElementById("maplist").onclick = e => {
@@ -400,7 +399,7 @@ document.getElementById("maplist").onclick = e => {
   state.onMap = state.onMap.includes(n) ? state.onMap.filter(x => x !== n) : [...state.onMap, n];
   save();
   b.setAttribute("aria-pressed", state.onMap.includes(n));
-  document.getElementById("tabMap").textContent = "Mapa (" + state.onMap.length + ")";
+  document.getElementById("tabMap").textContent = "{{map}} (" + state.onMap.length + ")";
   renderGo();
 };
 document.getElementById("party").onclick = e => {
@@ -421,7 +420,7 @@ document.getElementById("list").onclick = e => {
   state.owned = [...owned];
   save();
   for (const b of e.target.parentNode.children) b.setAttribute("aria-pressed", owned.has(b.dataset.k));
-  document.getElementById("tabSt").textContent = "Statusy (" + state.owned.length + ")";
+  document.getElementById("tabSt").textContent = "{{statuses}} (" + state.owned.length + ")";
   renderGo();
 };
 render();

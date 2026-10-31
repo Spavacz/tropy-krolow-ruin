@@ -5,6 +5,7 @@ Usage: python -I -X utf8 statusmap.py appData.sqlite statusmap.json
 English text is parsed (its wording is regular); Polish labels and status names ride along by element.
 """
 import collections
+import itertools
 import json
 import re
 import sqlite3
@@ -33,7 +34,7 @@ choice_txt = {(ch, lang): (clean(r), clean(s)) for ch, lang, r, s in con.execute
     "select _idChoice, _idLang, reqTxt, resTxt from ChoiceInfoText where _idLang in (?, ?)", (EN, PL))}
 
 loc_num = dict(con.execute("select _id, displayNumber from Location where _campId=?", (CAMP,)))
-verses = {vid: {"loc": loc_num[l], "num": n, "text_pl": "", "leads_pl": [], "gains": [], "choices": []}
+verses = {vid: {"loc": loc_num[l], "num": n, "text_pl": "", "text_en": "", "leads": [], "gains": [], "choices": []}
           for vid, l, n in con.execute("select _id, _locationId, displayNumber from Verse") if l in loc_num}
 
 ALIAS = {"s mall favor": "Small Favor", "small favors": "Small Favor", "times passes": "Time Passes"}  # typos in the source texts
@@ -44,7 +45,7 @@ HERO = r"(Elgan|Gerdwyn|Iunis|Osbert)"
 # "requires Elgan or Gerdwyn", "If you're playing Iunis", "If Osbert is in this Location"
 HEROES = re.compile(rf"(?:requires|playing|[Ii]f)\s+{HERO}(?:\s*(?:,\s*|\s+or\s+){HERO})?(?:\s+or\s+{HERO})?")
 VERB = re.compile(r"\b(gain|don’t have|don't have|do not have|lack|have|requires?)\b", re.I)
-LEAD = re.compile(r"Nowa Wskazówka:\s*(.+)", re.I)  # the game's own spoiler-free pointers
+LEAD = re.compile(r"(?:Nowa Wskazówka|New Lead):\s*(.+)", re.I)  # the game's own spoiler-free pointers
 CHAPTER = re.compile(r"playing (Chapter [^,.)]*?)(?=\s*(?:,|\.|\)|$| or if| and))")
 
 
@@ -105,8 +106,11 @@ for eid, vid, typ in con.execute("select _id, _idVer, type from VerseElements or
     chs = con.execute("select _id, _idTargetVer from ChoiceInfo where _elemId=?", (eid,)).fetchall()
     if typ == 0 and not chs:
         v["text_pl"] += ("\n\n" if v["text_pl"] else "") + pl.get(eid, "")
+        v["text_en"] += ("\n\n" if v["text_en"] else "") + t
         v["gains"] += split(mentions(t))[1]
-        v["leads_pl"] += LEAD.findall(pl.get(eid, ""))
+        # paired by element; a side the translation lacks stays "" and the page falls back to the other
+        v["leads"] += [{"pl": a, "en": b} for a, b in
+                       itertools.zip_longest(LEAD.findall(pl.get(eid, "")), LEAD.findall(t), fillvalue="")]
         continue
     for ch, target in chs:
         req, res = choice_txt.get((ch, EN), ("", ""))
@@ -116,12 +120,12 @@ for eid, vid, typ in con.execute("select _id, _idVer, type from VerseElements or
         chapter = CHAPTER.findall(t)
         heroes = sorted({h for m in HEROES.findall(t) for h in m if h})
         if "podpowied" in pl.get(eid, ""):  # "If you want to see a Hint, click here"
-            v["leads_pl"].append(choice_txt.get((ch, PL), ("", ""))[1])
+            v["leads"].append({"pl": choice_txt.get((ch, PL), ("", ""))[1], "en": res})
         v["choices"].append({
             "kind": {-1: "auto", 1: "branch", 2: "option"}.get(typ, "text"),
             "label_pl": pl.get(eid, ""), "label_en": t,
             "conds": conds, "chapter": chapter, "heroes": heroes, "gains": gains,
-            "result_pl": choice_txt.get((ch, PL), ("", ""))[1],
+            "result_pl": choice_txt.get((ch, PL), ("", ""))[1], "result_en": res,
             "target": target if target in verses else None,
         })
 
@@ -130,9 +134,12 @@ all_status = {s for v in verses.values() for s, *_ in v["gains"]} | {
     s for v in verses.values() for c in v["choices"] for s, *_ in c["conds"] + c["gains"]}
 missing = sorted(all_status - names.keys())
 
-loc_names = {n: name for i, n in loc_num.items()
-             for (name,) in con.execute("select name from LocationTexts where _idLoc=? and _idLang=?", (i, PL))}
-json.dump({"names_pl": names, "loc_names": loc_names, "verses": verses}, out.open("w", encoding="utf-8"), ensure_ascii=False, indent=0)
+def loc_names(lang):
+    return {n: name for i, n in loc_num.items()
+            for (name,) in con.execute("select name from LocationTexts where _idLoc=? and _idLang=?", (i, lang))}
+
+
+json.dump({"names_pl": names, "loc_names": loc_names(PL), "loc_names_en": loc_names(EN), "verses": verses}, out.open("w", encoding="utf-8"), ensure_ascii=False, indent=0)
 
 gained = {s for v in verses.values() for s, *_ in v["gains"] + [g for c in v["choices"] for g in c["gains"]]}
 needed = {s for v in verses.values() for c in v["choices"] for s, *_ in c["conds"]}

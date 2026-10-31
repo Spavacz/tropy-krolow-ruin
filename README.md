@@ -36,4 +36,9 @@ python -I -X utf8 guide.py statusmap.json guide_data.json guide.html
 node guide_test.js guide_data.json
 ```
 
+Ostatni argument `guide.py` wybiera język strony: `pl` (domyślny) albo `en`, np.
+`python -I -X utf8 guide.py statusmap.json guide_data.json guide.html en`. Teksty z gry (nazwy opcji, lokacji,
+statusów, wskazówki) idą z bazy w wybranym języku, napisy strony z `ui.json`, a streszczenia z `summaries.csv`
+(pl) albo `summaries_en.csv` (en). Bez pliku streszczeń strona buduje się bez sekcji „Co się działo”.
+
 Szczegóły działania i zasady rozwoju są w `CLAUDE.md`.

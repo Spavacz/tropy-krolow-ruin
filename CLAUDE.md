@@ -43,6 +43,10 @@ node guide_test.js guide_data.json
 - `guide.py` buduje bramki (wybory wymagające statusu, rozdziału albo postaci, które prowadzą do jeszcze
   niezdobytej części), wskazówki („Nowa Wskazówka” i przyciski „Podpowiedź”), streszczenia, odnośniki do
   wpisów i wstawia dane z logiką do `guide_template.html`, co daje samodzielny `guide.html`.
+- Język strony wybiera się przy budowaniu (`guide.py … guide.html en`, domyślnie `pl`), a nie na stronie:
+  na Netlify idzie tylko polski `guide.html`. Napisy strony są w `ui.json` (`{{klucz}}` w szablonie, w HTML
+  i w literałach JS, więc teksty bez `"` i `` ` ``). `statusmap.json` trzyma teksty gry w obu językach.
+  Testy dopasowują po miejscu i warunku, nie po etykiecie, żeby działały w każdym języku.
 - `guide_logic.js` to logika współdzielona przez stronę i testy: warunki, rozdziały, liczniki, wskazówki,
   kodowanie stanu do linku. `guide_test.js` zawiera testy na prawdziwych danych.
 - Publikacja: Netlify z repo GitHub (`netlify.toml`: bez kroku budowania, `/` serwuje `guide.html`), więc
@@ -55,7 +59,8 @@ node guide_test.js guide_data.json
 - `summaries.csv`: streszczenia każdej części statusu (`status` po angielsku, `part`, tekst po polsku;
   pusty tekst oznacza część czysto mechaniczną). Styl: 1–2 zdania, **formy neutralne płciowo** (bez
   „-łeś/-łaś”), tylko to, co już się wydarzyło. Brakujące części po zmianie danych wypisze
-  `summary_src.py statusmap.json <katalog> 40`.
+  `summary_src.py statusmap.json <katalog> 40`. Inny język ma własny plik (`summaries_en.csv`, z
+  `summary_src.py … 40 en`), pisany z tekstu gry w tym języku, a nie tłumaczony. Takiego pliku celowo nie ma w repo.
 - `leads_extra.csv`: wskazówki z ręcznie dobranym warunkiem pokazania (`show`) i zniknięcia (`hide`),
   alternatywy oddzielone `;`. Wiersz nadpisuje też automatycznie przypiętą wskazówkę. Używaj, gdy
   zadanie kończy się statusem z innego wątku, np. mapa senatora kończy się na Przyjaciel szlachty cz. 3.
