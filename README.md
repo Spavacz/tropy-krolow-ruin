@@ -1,7 +1,7 @@
 # Tropy Królów Ruin
 
 Strona bez spoilerów do kampanii „Królowie Ruin” gry Tainted Grail. Zaznaczasz statusy z papierowego arkusza,
-a strona pokazuje, co się działo i dokąd iść. Wersja online: https://claude.ai/artifact/ND3eEQjjzcQHJgEhprWtAP
+a strona pokazuje, co się działo i dokąd iść. Wersja online: https://taintedgrail.netlify.app
 
 Gotowa strona to `guide.html`. Działa też po otwarciu z dysku. Do przebudowy potrzebna jest baza tekstów gry,
 której nie ma w repo, bo to chroniona treść gry.

@@ -2,8 +2,8 @@
 
 Odpowiadaj użytkownikowi po polsku. To strona bez spoilerów do gry planszowej Tainted Grail: Królowie Ruin
 (aplikacja Companion, kampania 26). Gracz zaznacza statusy z papierowego arkusza, a strona pokazuje, co się
-działo i dokąd iść. Jest opublikowana jako artefakt claude.ai:
-https://claude.ai/artifact/ND3eEQjjzcQHJgEhprWtAP (udostępniona „każdy z linkiem”).
+działo i dokąd iść. Jest hostowana na Netlify: https://taintedgrail.netlify.app (instalowalna jako aplikacja).
+Starsza kopia to artefakt claude.ai https://claude.ai/artifact/ND3eEQjjzcQHJgEhprWtAP.
 
 Siostrzany projekt to polski lektor w `C:\Workspace\tgrail`. W jego katalogu leżą dane z telefonu,
 z których korzysta też ta strona.
