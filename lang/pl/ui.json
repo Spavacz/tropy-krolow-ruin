@@ -20,6 +20,7 @@
  "search": "Szukaj statusu",
  "tally_note": "Statusy bez numerowanych części (np. Upływ Czasu, Dług) zaznaczasz liczbą: ile ich masz.",
  "transfer": "Przenieś na inne urządzenie",
+ "transfer_tab": "Przenieś",
  "transfer_note": "Kod zawiera statusy, rozdział, drużynę i mapę. Skopiuj go tutaj i wklej na drugim urządzeniu.",
  "copy_link": "Kopiuj link ze stanem",
  "link_note": "Link otwiera tę stronę z Twoimi statusami. Starszy sposób, długi kod, działa dalej:",

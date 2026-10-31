@@ -20,6 +20,7 @@
  "search": "Buscar estado",
  "tally_note": "Los estados sin partes numeradas (p. ej. Transcurso del tiempo, Deuda) se marcan con un número: cuántos tienes.",
  "transfer": "Pasar a otro dispositivo",
+ "transfer_tab": "Pasar",
  "transfer_note": "El código guarda los estados, el capítulo, el grupo y el mapa. Cópialo aquí y pégalo en el otro dispositivo.",
  "copy_link": "Copiar enlace con el estado",
  "link_note": "El enlace abre esta página con tus estados. El método antiguo, un código largo, sigue funcionando:",

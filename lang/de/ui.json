@@ -20,6 +20,7 @@
  "search": "Status suchen",
  "tally_note": "Status ohne nummerierte Teile (z. B. Vergangene Zeit, Schulden) markierst du mit einer Zahl: wie viele du hast.",
  "transfer": "Auf ein anderes Gerät übertragen",
+ "transfer_tab": "Übertragen",
  "transfer_note": "Der Code enthält Status, Kapitel, Gruppe und Karte. Kopiere ihn hier und füge ihn auf dem anderen Gerät ein.",
  "copy_link": "Link mit Stand kopieren",
  "link_note": "Der Link öffnet diese Seite mit deinen Status. Der ältere Weg, ein langer Code, funktioniert weiter:",

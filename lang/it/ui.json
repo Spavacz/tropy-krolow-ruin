@@ -20,6 +20,7 @@
  "search": "Cerca uno stato",
  "tally_note": "Gli stati senza parti numerate (es. Il Tempo Passa, Debito) si segnano con un numero: quanti ne hai.",
  "transfer": "Trasferisci su un altro dispositivo",
+ "transfer_tab": "Trasferisci",
  "transfer_note": "Il codice contiene stati, capitolo, gruppo e mappa. Copialo qui e incollalo sull’altro dispositivo.",
  "copy_link": "Copia il link con lo stato",
  "link_note": "Il link apre questa pagina con i tuoi stati. Il vecchio metodo, un codice lungo, funziona ancora:",

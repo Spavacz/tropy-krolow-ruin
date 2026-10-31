@@ -67,7 +67,6 @@ details.thread ol { margin: 8px 0 0; padding-left: 1.4em; display: grid; gap: 4p
 .maplist { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
 .maplist .chip { text-align: left; display: flex; gap: 6px; align-items: baseline; min-width: 0; }
 .maplist .chip span { overflow-wrap: anywhere; }
-.transfer { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
 .transfer textarea { width: 100%; box-sizing: border-box; font: .8rem/1.3 ui-monospace, monospace; color: var(--fg);
   background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px; word-break: break-all; }
 details.older > summary { cursor: pointer; color: var(--muted); padding-block: 6px; }
@@ -89,6 +88,7 @@ details.older[open] > details.thread { margin-top: 8px; }
       <button id="tabGo" role="tab" aria-selected="true">Où aller</button>
       <button id="tabSt" role="tab" aria-selected="false">Statuts</button>
       <button id="tabMap" role="tab" aria-selected="false">Carte</button>
+      <button id="tabTr" role="tab" aria-selected="false">Transférer</button>
     </div>
   </header>
 
@@ -113,10 +113,7 @@ details.older[open] > details.thread { margin-top: 8px; }
     <div class="maplist" id="maplist"></div>
   </main>
 
-  <main id="sheet" hidden>
-    <input type="search" id="q" placeholder="Chercher un statut…" aria-label="Chercher un statut">
-    <div id="list"></div>
-    <p class="note">Les statuts sans parties numérotées (p. ex. Le temps passe, Dette) se cochent par un nombre : combien vous en avez.</p>
+  <main id="transfer" hidden>
     <section class="transfer" aria-labelledby="trH">
       <h2 id="trH">Transférer vers un autre appareil</h2>
       <p class="note">Le code contient les statuts, le chapitre, le groupe et la carte. Copiez-le ici et collez-le sur l’autre appareil.</p>
@@ -126,6 +123,12 @@ details.older[open] > details.thread { margin-top: 8px; }
       <textarea id="code" rows="3" aria-label="Code de l’état"></textarea>
       <div class="row"><button class="btn" id="loadCode">Charger le code collé</button><span class="note" id="loadMsg" role="status"></span></div>
     </section>
+  </main>
+
+  <main id="sheet" hidden>
+    <input type="search" id="q" placeholder="Chercher un statut…" aria-label="Chercher un statut">
+    <div id="list"></div>
+    <p class="note">Les statuts sans parties numérotées (p. ex. Le temps passe, Dette) se cochent par un nombre : combien vous en avez.</p>
   </main>
 
   <footer class="note" style="border-top: 1px solid var(--line); padding-top: 12px">
@@ -397,7 +400,7 @@ function render() {
 }
 
 function tab(view) {
-  for (const [id, t] of [["go", "tabGo"], ["sheet", "tabSt"], ["map", "tabMap"]]) {
+  for (const [id, t] of [["go", "tabGo"], ["sheet", "tabSt"], ["map", "tabMap"], ["transfer", "tabTr"]]) {
     document.getElementById(id).hidden = id !== view;
     document.getElementById(t).setAttribute("aria-selected", id === view);
   }
@@ -405,6 +408,7 @@ function tab(view) {
 document.getElementById("tabGo").onclick = () => tab("go");
 document.getElementById("tabSt").onclick = () => tab("sheet");
 document.getElementById("tabMap").onclick = () => tab("map");
+document.getElementById("tabTr").onclick = () => tab("transfer");
 
 for (const [id, f] of [["chN", "n"], ["chL", "letter"], ["chP", "part"]])
   document.getElementById(id).onchange = e => {

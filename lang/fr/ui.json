@@ -20,6 +20,7 @@
  "search": "Chercher un statut",
  "tally_note": "Les statuts sans parties numérotées (p. ex. Le temps passe, Dette) se cochent par un nombre : combien vous en avez.",
  "transfer": "Transférer vers un autre appareil",
+ "transfer_tab": "Transférer",
  "transfer_note": "Le code contient les statuts, le chapitre, le groupe et la carte. Copiez-le ici et collez-le sur l’autre appareil.",
  "copy_link": "Copier le lien avec l’état",
  "link_note": "Le lien ouvre cette page avec vos statuts. L’ancienne méthode, un long code, marche toujours :",

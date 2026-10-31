@@ -20,6 +20,7 @@
  "search": "Search statuses",
  "tally_note": "Statuses without numbered parts (e.g. Time Passes, Debt) are marked with a number: how many you have.",
  "transfer": "Move to another device",
+ "transfer_tab": "Transfer",
  "transfer_note": "The code holds statuses, chapter, party and map. Copy it here and paste it on the other device.",
  "copy_link": "Copy link with state",
  "link_note": "The link opens this page with your statuses. The older way, a long code, still works:",
